@@ -32,7 +32,8 @@ BEGIN
             IF writeEnable = '1' THEN
                 ram(to_integer(unsigned((writeRegisterAddress)))) := writeData;
             END IF;
-        ELSIF falling_edge(clk) THEN
+        END IF;
+        IF falling_edge(clk) THEN
             readData1 <= ram(to_integer(unsigned((registerAddress1))));
             readData2 <= ram(to_integer(unsigned((registerAddress2))));
         END IF;
