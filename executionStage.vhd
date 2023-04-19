@@ -25,7 +25,7 @@ BEGIN
     firstOperand <= Op1 when S1_FU = "00" else
                     EM_OP when S1_FU = "01" else
                     MM_OP when S1_FU = "10" else
-                    MWB_OP when S1_FU = "11";
+                    MWB_OP when S1_FU = "11" else (OTHERS => '0');
     --Selecting if the second operand is immediate or not
     Op2Temp <= Op2 when isImmediate = '0' else
                 immediateOP;
@@ -33,7 +33,7 @@ BEGIN
     secondOperand <= Op2Temp when S2_FU = "00" else
                     EM_OP when S2_FU = "01" else
                     MM_OP when S2_FU = "10" else
-                    MWB_OP when S2_FU = "11";  
+                    MWB_OP when S2_FU = "11" else (OTHERS => '0');
     --Outputing the alu output
     aluOut <= aluOutTemp when inPortEnable = '0' else
                     inPort;
