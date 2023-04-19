@@ -17,6 +17,7 @@ inPortEnable: out std_logic;
 pcSrc: out std_logic_vector (1 downto 0);
 --stackOP:  out std_logic_vector (2 downto 0);
 --BranchTrue: out std_logic;
+--return signal: out std_logic;
 operation: out std_logic_vector(2 downto 0)
 
 );
