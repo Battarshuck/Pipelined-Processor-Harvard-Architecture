@@ -1,6 +1,19 @@
 LIBRARY IEEE;
 USE IEEE.std_logic_1164.ALL;
 
+-- 000 f=a b=0 ----> NOP
+-- ------------------------
+-- 001 f=a+b --> ADD
+-- 111 f=a+1 cin=1 b =1--> INC
+-- -------------------------
+-- 010 f= a-b cin = 1 -> SUB
+-- 011 f=a-b cin = 1, b=1 --> DEC
+-- --------------------------
+-- 100 f=a or b --> OR
+-- 101 f = a and b --> AND
+-- 110 f = not a ---> NOT
+-- ---------------------------
+
 ENTITY alu IS
     PORT (
         firstOperand, secondOperand : IN STD_LOGIC_VECTOR(15 DOWNTO 0);
