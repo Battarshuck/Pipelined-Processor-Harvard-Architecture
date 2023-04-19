@@ -12,7 +12,6 @@ memToReg: out std_logic;
 --outPortEnable: out std_logic;
 --SPSignal: out std_logic;
 inPortEnable: out std_logic;
---isImmediate: out std_logic;
 --jumpType: out std_logic_vector (1 downto 0);
 pcSrc: out std_logic_vector (1 downto 0);
 --stackOP:  out std_logic_vector (2 downto 0);

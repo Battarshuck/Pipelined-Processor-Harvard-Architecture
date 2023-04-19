@@ -19,24 +19,26 @@ END ENTITY RegisterFile;
 
 architecture RegisterFile_arch of RegisterFile is
     TYPE ram_type IS ARRAY(0 TO 7) OF STD_LOGIC_VECTOR(15 DOWNTO 0);
+    signal ram: ram_type;
 BEGIN
 
     PROCESS (clk, rst) IS
-    variable ram : ram_type;
+    --variable ram : ram_type;
     BEGIN
         IF (rst = '1') THEN
             FOR index IN 0 TO 7 LOOP
-                ram(index) := (OTHERS => '0');
+                ram(index) <= (OTHERS => '0');
             END LOOP;
         ELSIF rising_edge(clk) THEN
             IF writeEnable = '1' THEN
-                ram(to_integer(unsigned((writeRegisterAddress)))) := writeData;
+                ram(to_integer(unsigned((writeRegisterAddress)))) <= writeData;
             END IF;
         END IF;
-        IF falling_edge(clk) THEN
-            readData1 <= ram(to_integer(unsigned((registerAddress1))));
-            readData2 <= ram(to_integer(unsigned((registerAddress2))));
-        END IF;
+       -- IF falling_edge(clk) THEN
+            
+       -- END IF;
     END PROCESS;
+     readData1 <= ram(to_integer(unsigned((registerAddress1))));
+     readData2 <= ram(to_integer(unsigned((registerAddress2))));
 
 END RegisterFile_arch;
