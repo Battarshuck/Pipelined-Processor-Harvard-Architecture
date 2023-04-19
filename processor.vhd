@@ -27,7 +27,7 @@ ARCHITECTURE processorArch OF processor IS
     SIGNAL EM_OP, MM_OP, MWB_OP, immediateOP : STD_LOGIC_VECTOR(15 DOWNTO 0) := (OTHERS => '0');
     SIGNAL S1_FU, S2_FU : STD_LOGIC_VECTOR(1 DOWNTO 0) := (OTHERS => '0');
     SIGNAL inPortEnable : STD_LOGIC := '0';
-    SIGNAL flag STD_LOGIC_VECTOR(2 DOWNTO 0) := (OTHERS => '0');
+    SIGNAL flag : STD_LOGIC_VECTOR(2 DOWNTO 0) := (OTHERS => '0');
 
 BEGIN
     fetchStage : ENTITY work.fetchStage PORT MAP(clk, rst, bubblingSignal, pcSource, jmpAddress, callAddress
