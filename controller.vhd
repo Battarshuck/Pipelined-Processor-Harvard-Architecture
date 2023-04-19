@@ -17,7 +17,7 @@ inPortEnable: out std_logic;
 pcSrc: out std_logic_vector (1 downto 0);
 --stackOP:  out std_logic_vector (2 downto 0);
 --BranchTrue: out std_logic;
-operation: out std_logic_vector(3 downto 0)
+operation: out std_logic_vector(2 downto 0)
 
 );
 end entity;
@@ -37,10 +37,10 @@ begin
 --LDD	10011  Load enables memRead and memToReg to 1.
 --STD   10100  Store enables memWrite.
 
-operation<="0000" when opCode="00000" else
-"0001" when opCode="00100" else
-"0010" when opCode="01010" else
-"0000";
+operation<="000" when opCode="00000" else
+"111" when opCode="00100" else --increament
+"001" when opCode="01010" else --add
+"000";
 
 --NOP or Branching or Stalling w keda lesa phase 2
 writeEnable<='0' when opCode="00000"    else
