@@ -16,6 +16,7 @@ inPortEnable: out std_logic;
 --jumpType: out std_logic_vector (1 downto 0);
 pcSrc: out std_logic_vector (1 downto 0);
 --stackOP:  out std_logic_vector (2 downto 0);
+--BranchTrue: out std_logic;
 operation: out std_logic_vector(3 downto 0)
 
 );
@@ -35,7 +36,6 @@ begin
 --IN	01100 enables inPortEnable and writeEnable.
 --LDD	10011  Load enables memRead and memToReg to 1.
 --STD   10100  Store enables memWrite.
---for alu control signals
 
 operation<="0000" when opCode="00000" else
 "0001" when opCode="00100" else
