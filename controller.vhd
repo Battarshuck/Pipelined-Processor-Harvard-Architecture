@@ -39,11 +39,11 @@ begin
 
 operation<="000" when opCode="00000" else
 "111" when opCode="00100" else --increament
-"001" when opCode="01010" else --add
+"101" when opCode="01010" else --and
 "000";
 
 --NOP or Branching or Stalling w keda lesa phase 2
-writeEnable<='0' when opCode="00000"    else
+writeEnable<='0' when opCode="00000" or  opCode="10100"  else
 '1';
 
 memRead<='1' when opCode="10011" else
