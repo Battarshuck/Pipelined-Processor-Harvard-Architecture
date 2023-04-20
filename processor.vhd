@@ -29,7 +29,7 @@ ARCHITECTURE processorArch OF processor IS
     SIGNAL doperation, writeRegisterAddress : STD_LOGIC_VECTOR(2 DOWNTO 0);
     SIGNAL EM_OP, MM_OP, MWB_OP, immediateOP : STD_LOGIC_VECTOR(15 DOWNTO 0) := (OTHERS => '0');
     SIGNAL S1_FU, S2_FU : STD_LOGIC_VECTOR(1 DOWNTO 0) := (OTHERS => '0');
-    SIGNAL inPortEnable : STD_LOGIC := '0';
+    --SIGNAL inPortEnable : STD_LOGIC := '0';
     SIGNAL flag : STD_LOGIC_VECTOR(2 DOWNTO 0) := (OTHERS => '0');
     SIGNAL CallSignalControl : STD_LOGIC := '0';
     SIGNAL SPSignalControl : STD_LOGIC := '0';
@@ -78,7 +78,7 @@ BEGIN
     --outDEbuffer[77] is writeEnable SIGNAL
 
     executionStage : ENTITY work.executionStage PORT MAP(outDEbuffer(31 DOWNTO 16), outDEbuffer(15 DOWNTO 0),
-        inputPort, EM_OP, MM_OP, MWB_OP, immediateOP, S1_FU, S2_FU, outDEbuffer(72), inPortEnable,
+        inputPort, EM_OP, MM_OP, MWB_OP, immediateOP, S1_FU, S2_FU, outDEbuffer(72), dinPortEnable,
         outDEbuffer(69 DOWNTO 67), aluOut,
         carryOutFlag, zeroFlag, negativeFlag);
 
