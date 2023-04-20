@@ -6,7 +6,7 @@ ENTITY memoryStage IS
     PORT (
         clk, reset, MemWriteControl, MemReadControl, CallSignalControl, SPSignalControl : IN std_logic;
         PCAfterAddition, dataFromALU: in std_logic_vector(15 downto 0);--data in
-        RdstAddress, SPAddress: in std_logic_vector(15 downto 0);
+        Rsrc2Address, SPAddress: in std_logic_vector(15 downto 0);
         ReadData: out std_logic_vector(15 downto 0)--data out       
         ); 
 END ENTITY memoryStage;
@@ -21,7 +21,7 @@ BEGIN
     writeData <= dataFromALU WHEN CallSignalControl = '0' ELSE
                 PCAfterAddition;
 
-    Address <= RdstAddress WHEN SPSignalControl = '0' ELSE
+    Address <= Rsrc2Address WHEN SPSignalControl = '0' ELSE
                 SPAddress;
 
     ReadData <= memoryOut; 

@@ -24,8 +24,7 @@ BEGIN
     elsif rising_edge(clk) and MemWrite = '1' THEN	
         ram(to_integer(unsigned((Address(9 downto 0))))) := WriteData;
     END IF;
-
-    IF falling_edge(clk) and MemRead = '1' then
+    IF  MemRead = '1' then --falling_edge(clk) and
         ReadData <= ram(to_integer(unsigned((Address(9 downto 0)))));
     END IF;
 END PROCESS;
