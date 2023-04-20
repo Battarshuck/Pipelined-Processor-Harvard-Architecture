@@ -12,7 +12,7 @@ END ENTITY processor;
 ARCHITECTURE processorArch OF processor IS
     SIGNAL jmpAddress, callAddress, returnAddress, pcAfterAddition, readData1Decode, readData2Decode, writeBackData
     : STD_LOGIC_VECTOR(15 DOWNTO 0);
-    SIGNAL bubblingSignal, writeBackEnable, FDbufferEnable, DEbufferEnable, EM1bufferEnable,MMbufferEnable,MWBbufferEnable, FDrst, DErst, EM1rst,MMrst,MWBrst : STD_LOGIC := '0';
+    SIGNAL bubblingSignal, writeBackEnable, FDbufferEnable, DEbufferEnable, EM1bufferEnable,MMbufferEnable,MWBbufferEnable, FDrst, DErst, EM1rst,MMrst,MWBrst, flagEnable : STD_LOGIC := '0';
     SIGNAL pcSource : STD_LOGIC_VECTOR(1 DOWNTO 0) := "00";
     SIGNAL instructions : STD_LOGIC_VECTOR(31 DOWNTO 0);
     SIGNAL aluOut : STD_LOGIC_VECTOR(15 DOWNTO 0);
@@ -30,12 +30,12 @@ ARCHITECTURE processorArch OF processor IS
     SIGNAL EM_OP, MM_OP, MWB_OP, immediateOP : STD_LOGIC_VECTOR(15 DOWNTO 0) := (OTHERS => '0');
     SIGNAL S1_FU, S2_FU : STD_LOGIC_VECTOR(1 DOWNTO 0) := (OTHERS => '0');
     --SIGNAL inPortEnable : STD_LOGIC := '0';
-    SIGNAL flag : STD_LOGIC_VECTOR(2 DOWNTO 0) := (OTHERS => '0');
+    SIGNAL flagInput, flagOut : STD_LOGIC_VECTOR(2 DOWNTO 0) := (OTHERS => '0');
+    SIGNAL flagRst : STD_LOGIC := '0';
     SIGNAL CallSignalControl : STD_LOGIC := '0';
     SIGNAL SPSignalControl : STD_LOGIC := '0';
     SIGNAL SPAddress : STD_LOGIC_VECTOR(15 DOWNTO 0) := (OTHERS => '0');
     
-
 BEGIN
     fetchStage : ENTITY work.fetchStage PORT MAP(clk, rst, bubblingSignal, pcSource, jmpAddress, callAddress
         , returnAddress, pcAfterAddition, instructions);
@@ -82,10 +82,16 @@ BEGIN
         outDEbuffer(69 DOWNTO 67), aluOut,
         carryOutFlag, zeroFlag, negativeFlag);
 
-    inEM1buffer <= outDEbuffer(77)& outDEbuffer(76)& outDEbuffer(75)& outDEbuffer(74) & outDEbuffer(71 downto 70) & outDEbuffer(66 downto 51) & outDEbuffer(50 downto 48)  & flag & outDEbuffer(15 downto 0) & aluOut;
+    flagEnable <= '1' when outDEbuffer(69 downto 67) = "111" or outDEbuffer(69 downto 67) = "101" else
+                    '0';
+
+    flagRst <= rst;
+    flagInput <= carryOutFlag & zeroFlag & negativeFlag;
+    flagRegister : ENTITY work.buff GENERIC MAP(3) PORT MAP(flagInput, clk, flagRst, flagEnable, flagOut);
+    inEM1buffer <= outDEbuffer(77)& outDEbuffer(76)& outDEbuffer(75)& outDEbuffer(74) & outDEbuffer(71 downto 70) & outDEbuffer(66 downto 51) & outDEbuffer(50 downto 48)  & flagOut & outDEbuffer(15 downto 0) & aluOut;
     --inEM1Buffer[0:15] is aluOut
     --inEM1Buffer[16:31] is Rsource2
-    --inEM1Buffer[32:34] is flag
+    --inEM1Buffer[32:34] is flagOut
     --inEM1Buffer[35:37] is Rdest
     --inEM1Buffer[38:53] is pc+1
     --inEM1Buffer[54:55] is PcSrc --for branching
