@@ -78,7 +78,7 @@ BEGIN
     --outDEbuffer[77] is writeEnable SIGNAL
 
     executionStage : ENTITY work.executionStage PORT MAP(outDEbuffer(31 DOWNTO 16), outDEbuffer(15 DOWNTO 0),
-        inputPort, EM_OP, MM_OP, MWB_OP, immediateOP, S1_FU, S2_FU, outDEbuffer(72), dinPortEnable,
+        inputPort, EM_OP, MM_OP, MWB_OP, immediateOP, S1_FU, S2_FU, outDEbuffer(72), outDEbuffer(73),
         outDEbuffer(69 DOWNTO 67), aluOut,
         carryOutFlag, zeroFlag, negativeFlag);
 
