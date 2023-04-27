@@ -1,0 +1,3 @@
+IN                 r1      
+CLRC
+BLB  ax, dx
