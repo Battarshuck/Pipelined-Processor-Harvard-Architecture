@@ -1,3 +1,23 @@
-IN                 r1      
-CLRC
-BLB  ax, dx
+IN R5			
+NOP
+NOP
+NOP
+NOP
+INC R5,R5 		
+INC R5,R5 		
+IN R1			
+IN R2			
+IN R3			
+NOP				
+STD R1,r1  	 
+STD R3,r2  	
+STD R2,r3  	
+INC R2,R1 		
+LDD R0, R2  	
+LDD R0, R3  	
+AND R1,R2,R5	
+INC R1,R1 		
+NOP				
+AND R3,R1,R2	
+NOP				
+NOP       
