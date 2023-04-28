@@ -98,7 +98,9 @@ def ishex(s):
 # this function get instruction string and returns all operands in this instrucion
 # In r1, r2 --> ['IN', 'R1', 'R2']
 def splitInstruction(instruction: str) -> List:
-    currentInstruction = instruction.strip()
+    
+    currentInstruction = instruction.split("#", 1)[0]
+    currentInstruction = currentInstruction.strip()
     instructionAndOperands = currentInstruction.split(" ", 1)
 
     if len(instructionAndOperands) == 1:
@@ -128,14 +130,27 @@ def writeInFinaleFile(instructionCode: str, lineNumber: int, outputFile):
 
 def compile(nameInputFile: str, outputFile):
     lineNumber: int = 0
-    actualLineNumber: int = 1
+    actualLineNumber: int = 0
     with open(nameInputFile, "r") as inputFile:
         for line in inputFile:
+            actualLineNumber += 1
+
             instructionCode: str = ""
             currentOperands: List = splitInstruction(line)
 
             if currentOperands[0] == "" or currentOperands[0][0] == "#":
-                actualLineNumber += 1
+                continue
+
+
+            if ishex(currentOperands[0]) and len(currentOperands[0]) < 5:
+
+                if len(currentOperands) != 1:
+                    raise Exception(
+                        "(NUMBER OF PARAMETERS) Syntax error at line number " + str(actualLineNumber))
+                
+                data = bin(int(currentOperands[0],16))[2:].zfill(16)
+                writeInFinaleFile(data, lineNumber, outputFile)
+                lineNumber += 1
                 continue
 
 
@@ -168,7 +183,6 @@ def compile(nameInputFile: str, outputFile):
                     else:
                         raise Exception(
                             "(WRONG VALUE OR NUMBER OF PARAMETERS) Syntax error at line number " + str(actualLineNumber))
-                    actualLineNumber += 1
                     continue #this command does not need to be written in the output file, so we continue to the next line
 
                 if currentOperands[1] not in registers:
@@ -248,7 +262,6 @@ def compile(nameInputFile: str, outputFile):
                 writeInFinaleFile(immediateValue, lineNumber, outputFile)
 
             lineNumber += 1
-            actualLineNumber += 1
                 
 
             
