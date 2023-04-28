@@ -25,7 +25,9 @@ opCodes: Dict = {
     "JC": "10110",
     "JMP": "10111",
     "IADD": "11000",
-    "LDM": "11001"
+    "LDM": "11001",
+
+    ".ORG": "XXXXX"
 }
 
 zeroOperands: Set = {
@@ -43,7 +45,8 @@ oneOperand: Set = {
     "CALL",
     "JZ",
     "JC",
-    "JMP"
+    "JMP",
+    ".ORG"
 }
 twoOperands: Set = {
     "NOT",
@@ -125,23 +128,28 @@ def writeInFinaleFile(instructionCode: str, lineNumber: int, outputFile):
 
 def compile(nameInputFile: str, outputFile):
     lineNumber: int = 0
+    actualLineNumber: int = 1
     with open(nameInputFile, "r") as inputFile:
         for line in inputFile:
             instructionCode: str = ""
             currentOperands: List = splitInstruction(line)
 
+            if currentOperands[0] == "" or currentOperands[0][0] == "#":
+                actualLineNumber += 1
+                continue
+
+
             if currentOperands[0] not in opCodes:
                 raise Exception(
-                    "(COMMAND NOT FOUND) Syntax error at line number " + str(lineNumber))
+                    "(COMMAND NOT FOUND) Syntax error at line number " + str(actualLineNumber))
 
             instructionCode += opCodes[currentOperands[0]] #opcode
 
-            expectedNumOfOperands: int = expectedNumberOfOperands(
-                currentOperands[0])
+            expectedNumOfOperands: int = expectedNumberOfOperands(currentOperands[0])
 
             if expectedNumOfOperands != len(currentOperands) - 1:
                 raise Exception(
-                    "(CHECK NUM OF OPERANDS) Syntax error at line number " + str(lineNumber))
+                    "(CHECK NUM OF OPERANDS) Syntax error at line number " + str(actualLineNumber))
 
             # zero operands
             if expectedNumOfOperands == 0:
@@ -150,9 +158,22 @@ def compile(nameInputFile: str, outputFile):
 
             # one operand
             if expectedNumOfOperands == 1:
+                #checking if it is an .ORG command that changes the line number
+                if currentOperands[0] == ".ORG":
+                    address = currentOperands[1]
+                    #checiing if the address is a hex number and if it is less than 5 digits(as a string)
+                    if  len(address) < 5 and ishex(address):  
+                        addressNum = int(address,16) #converting the hex number to decimal
+                        lineNumber = addressNum #changing the line number
+                    else:
+                        raise Exception(
+                            "(WRONG VALUE OR NUMBER OF PARAMETERS) Syntax error at line number " + str(actualLineNumber))
+                    actualLineNumber += 1
+                    continue #this command does not need to be written in the output file, so we continue to the next line
+
                 if currentOperands[1] not in registers:
                     raise Exception(
-                        "(REG NAME NOT FOUND) Syntax error at line number " + str(lineNumber))
+                        "(REG NAME NOT FOUND) Syntax error at line number " + str(actualLineNumber))
                 instructionCode += registers[currentOperands[1]]
                 instructionCode += "000000000000000000"
                 instructionCode = instructionCode[0:16]
@@ -162,7 +183,7 @@ def compile(nameInputFile: str, outputFile):
                 if currentOperands[0] not in diffrentBehaviorOperands and currentOperands[0] not in immediateOperands:
                     if currentOperands[1] not in registers or  currentOperands[2] not in registers:
                         raise Exception(
-                            "(REG NAME NOT FOUND) Syntax error at line number " + str(lineNumber))
+                            "(REG NAME NOT FOUND) Syntax error at line number " + str(actualLineNumber))
                     instructionCode += registers[currentOperands[1]]
                     instructionCode += registers[currentOperands[2]]
                     instructionCode += "000000000000000000"
@@ -173,7 +194,7 @@ def compile(nameInputFile: str, outputFile):
                 if currentOperands[0] not in immediateOperands:
                     if currentOperands[1] not in registers or  currentOperands[2] not in registers or  currentOperands[3] not in registers:
                         raise Exception(
-                            "(REG NAME NOT FOUND) Syntax error at line number " + str(lineNumber))
+                            "(REG NAME NOT FOUND) Syntax error at line number " + str(actualLineNumber))
                     instructionCode += registers[currentOperands[1]]
                     instructionCode += registers[currentOperands[2]]
                     instructionCode += registers[currentOperands[3]]
@@ -184,7 +205,7 @@ def compile(nameInputFile: str, outputFile):
             if currentOperands[0] in diffrentBehaviorOperands:
                 if currentOperands[1] not in registers or  currentOperands[2] not in registers:
                     raise Exception(
-                        "(REG NAME NOT FOUND) Syntax error at line number " + str(lineNumber))
+                        "(REG NAME NOT FOUND) Syntax error at line number " + str(actualLineNumber))
                 
                 if currentOperands[0] == "LDD":
                     instructionCode += registers[currentOperands[1]]
@@ -203,7 +224,7 @@ def compile(nameInputFile: str, outputFile):
             if currentOperands[0] in immediateOperands :
                 if currentOperands[1] not in registers:
                     raise Exception(
-                        "(REG NAME NOT FOUND) Syntax error at line number " + str(lineNumber))
+                        "(REG NAME NOT FOUND) Syntax error at line number " + str(actualLineNumber))
                 instructionCode += registers[currentOperands[1]] #Rdst
 
                 if expectedNumOfOperands == 3:
@@ -216,7 +237,7 @@ def compile(nameInputFile: str, outputFile):
                 immediateValue = currentOperands[2] if expectedNumOfOperands == 2 else currentOperands[3]
                 if len(immediateValue) > 4 or not ishex(immediateValue):
                     raise Exception(
-                        "(WRONG IMMEDIATE VALUE) Syntax error at line number " + str(lineNumber)) 
+                        "(WRONG IMMEDIATE VALUE) Syntax error at line number " + str(actualLineNumber)) 
 
                 immediateValue = bin(int(immediateValue,16))[2:].zfill(16)
 
@@ -227,6 +248,7 @@ def compile(nameInputFile: str, outputFile):
                 writeInFinaleFile(immediateValue, lineNumber, outputFile)
 
             lineNumber += 1
+            actualLineNumber += 1
                 
 
             
@@ -240,6 +262,7 @@ outputFile.write("// format=mti addressradix=d dataradix=b version=1.0 wordsperl
 
 try:
     compile("inputFile.txt", outputFile)
+    print("Compilation finished successfully!")
 except Exception as e:
     print(e)
 
