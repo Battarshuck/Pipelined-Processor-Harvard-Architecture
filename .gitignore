@@ -1,0 +1,14 @@
+
+*.mpf
+*.qdb
+work/_lib1_0.qpg
+work/_info
+work/_lib1_0.qtl
+work/_vmake
+Project.cr.mti
+RegisterFile.vhd.bak
+vsim.wlf
+*.qtl
+*.qpg
+*.vstf
+.vscode/launch.json
