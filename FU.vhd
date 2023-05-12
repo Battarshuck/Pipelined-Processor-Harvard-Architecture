@@ -5,7 +5,8 @@ USE IEEE.std_logic_1164.ALL;
 -- -- not done phase 2
 ENTITY FU IS
      PORT (
-        --register source 1 and 2 at decode stage to compare if they are equal to the register destination at execute stage or memory stage
+        --register source 1 and 2 at decode stage to compare if they are 
+        --equal to the register destination at execute stage or memory stage
         -- 1 or memory stage 2
          Rs1,Rs2: IN STD_LOGIC_VECTOR(2 DOWNTO 0); 
          --write back signals from all buffers after execute stage
@@ -13,7 +14,7 @@ ENTITY FU IS
          --We need forwarding for store operations as STR RS2,RS1 example
          --Add R1,R3,R4
          --Add R2,R6,R7
-         --STR R1,R2 ---> R2 is the destination register and R1 is the source register
+         --STR R1,R2 ---> R2 is data register and R1 is the address register (holds the address of store)
          --R1 value is the addres that needs forwarding for the store operation
         MemoryWriteSigEM,MemoryWriteSigMM,MemoryWriteSigMWB: IN STD_LOGIC;
          --register destination at execute stage or memory stage 1 or memory stage 2
@@ -25,18 +26,19 @@ END ENTITY FU;
 ARCHITECTURE fuArch OF FU IS
 BEGIN
 --operand 1 will be selected 
---
-OP1Sel<="01" when (Rs1=RdEM and WriteBackOutEM='1') else
-        "10" when (Rs1=RdMM and WriteBackOutMM='1') else
-        "11" when (Rs1=RdMWB and WriteBackMWB='1') else
+        --forward first operand value
+OP1Sel<="01" when (Rs1=RdEM and (WriteBackOutEM='1' or MemoryWriteSigEM='1')) else
+        "10" when (Rs1=RdMM and (WriteBackOutMM='1' or MemoryWriteSigMM='1')) else
+        "11" when (Rs1=RdMWB and (WriteBackMWB='1' or MemoryWriteSigMWB='1')) else
         "00";
+        --forward second operand value
 OP2Sel<="01" when (Rs2=RdEM and WriteBackOutEM='1') else
         "10" when (Rs2=RdMM and WriteBackOutMM='1') else
         "11" when (Rs2=RdMWB and WriteBackMWB='1') else
         "00";
+        --for store operations OP3 to forward the address
 OP3Sel<="01" when (Rs2=RdEM and MemoryWriteSigEM='1') else
         "10" when (Rs2=RdMM and MemoryWriteSigMM='1') else
         "11" when (Rs2=RdMWB and MemoryWriteSigMWB='1') else
         "00";
 END fuArch;
-
