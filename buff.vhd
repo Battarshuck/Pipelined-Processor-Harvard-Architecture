@@ -21,7 +21,7 @@ BEGIN
             innerData := dataIn;
         END IF;
         --To ensure reading in falling edge
-        IF(falling_edge(clk) )THEN
+        IF(falling_edge(clk))THEN
             dataOut<=innerData;
         END IF;
     END PROCESS;
