@@ -27,9 +27,9 @@ ARCHITECTURE fuArch OF FU IS
 BEGIN
 --operand 1 will be selected 
         --forward first operand value
-OP1Sel<="01" when (Rs1=RdEM and (WriteBackOutEM='1' or MemoryWriteSigEM='1')) else
-        "10" when (Rs1=RdMM and (WriteBackOutMM='1' or MemoryWriteSigMM='1')) else
-        "11" when (Rs1=RdMWB and (WriteBackMWB='1' or MemoryWriteSigMWB='1')) else
+OP1Sel<="01" when (Rs1=RdEM and (WriteBackOutEM='1' )) else
+        "10" when (Rs1=RdMM and (WriteBackOutMM='1')) else
+        "11" when (Rs1=RdMWB and (WriteBackMWB='1')) else
         "00";
         --forward second operand value
 OP2Sel<="01" when (Rs2=RdEM and WriteBackOutEM='1') else
@@ -37,8 +37,8 @@ OP2Sel<="01" when (Rs2=RdEM and WriteBackOutEM='1') else
         "11" when (Rs2=RdMWB and WriteBackMWB='1') else
         "00";
         --for store operations OP3 to forward the address
-OP3Sel<="01" when (Rs2=RdEM and MemoryWriteSigEM='1') else
-        "10" when (Rs2=RdMM and MemoryWriteSigMM='1') else
-        "11" when (Rs2=RdMWB and MemoryWriteSigMWB='1') else
+OP3Sel<="01" when (Rs2=RdEM and WriteBackOutEM='1') else
+        "10" when (Rs2=RdMM and WriteBackOutMM='1') else
+        "11" when (Rs2=RdMWB and WriteBackMWB='1') else
         "00";
 END fuArch;
