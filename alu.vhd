@@ -48,7 +48,9 @@ BEGIN
     aluOutput <= currentOutput;
     carryOutFlag <= '0' WHEN selector = "101" OR selector = "100" OR selector = "110" ELSE
         cout;
+
     negativeFlag <= currentOutput(15);
+    
     zeroFlag <= '1' WHEN currentOutput = x"0000" ELSE
         '0';
 
