@@ -7,7 +7,7 @@ ENTITY executionStage IS
         clk,rst : IN STD_LOGIC;
         Op1,Op2,inPort : IN STD_LOGIC_VECTOR(15 DOWNTO 0);
         EM_OP,MM_OP,MWB_OP,immediateOP: IN STD_LOGIC_VECTOR(15 DOWNTO 0);
-        S1_FU,S2_FU : IN STD_LOGIC_VECTOR(1 DOWNTO 0);
+        S1_FU,S2_FU,S3_FU : IN STD_LOGIC_VECTOR(1 DOWNTO 0);
         isImmediate : IN STD_LOGIC;
         inPortEnable : IN STD_LOGIC;
         aluOp : IN STD_LOGIC_VECTOR(2 DOWNTO 0);
@@ -19,14 +19,15 @@ ENTITY executionStage IS
         branchTrueFlagOutput : OUT STD_LOGIC;
         RTISignal : IN STD_LOGIC;
         flagFromWB : IN STD_LOGIC_VECTOR(2 DOWNTO 0);
-        setOrClearFlag : IN STD_LOGIC_VECTOR(1 DOWNTO 0)        
+        setOrClearFlag : IN STD_LOGIC_VECTOR(1 DOWNTO 0);
+        RSCR2Address : OUT STD_LOGIC_VECTOR(15 DOWNTO 0)        
     );
 END ENTITY executionStage;
 
 
 ARCHITECTURE executionStageArch OF executionStage IS
     signal branchTrueFlag, flagEnable, tempCarry, tempCarryOutFlag, tempZeroOutFlag, tempNegativeOutFlag : STD_LOGIC;
-    signal firstOperand,secondOperand,Op2Temp,aluOutTemp : STD_LOGIC_VECTOR(15 DOWNTO 0);
+    signal firstOperand,secondOperand,Op2Temp,aluOutTemp, RSCR2AddressTemp: STD_LOGIC_VECTOR(15 DOWNTO 0);
     signal flagIn, flagOutput, tempFlagIn : STD_LOGIC_VECTOR(2 DOWNTO 0);
 BEGIN
 
@@ -79,6 +80,14 @@ BEGIN
     --Outputing the alu output
     aluOut <= aluOutTemp when inPortEnable = '0' else
                     inPort;
+
+    --=====================IF RSRC2 IS AN ADDRESS===========================
+    RSCR2Address <= RSCR2AddressTemp;
+    RSCR2AddressTemp <= Op2 when S3_FU = "00" else
+                        EM_OP when S3_FU = "01" else
+                        MM_OP when S3_FU = "10" else
+                        MWB_OP when S3_FU = "11" else 
+                        (OTHERS => '0');
 
     --=====================PC OUTPUT TO THE NEXT BUFFER===================== 
     --Outputing the incremented PC
