@@ -82,13 +82,13 @@ BEGIN
 
     --=====================PC OUTPUT TO THE NEXT BUFFER===================== 
     --Outputing the incremented PC
-    branchTrueFlagOutput <= branchTrueFlag; --this is the output signal going to the fetch stage, where is the PC changed
-
     PCoutput <= PCincremented when branchTrueFlag = '0' else --decding which PC should be outputed to the next buffer
                 firstOperand;
 
 
     --=====================BRANCHING=====================
+    branchTrueFlagOutput <= branchTrueFlag; --this is the output signal going to the fetch stage, where is the PC changed
+
     branchTrueFlag <= '0' WHEN jumpTypeSignal = "00" else -- this is the ouput from the branching unit
                       '1' WHEN jumpTypeSignal = "01" else
                       flagOutput(1) when jumpTypeSignal = "10" else
