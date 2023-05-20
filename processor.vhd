@@ -12,7 +12,7 @@ END ENTITY processor;
 ARCHITECTURE processorArch OF processor IS
     SIGNAL jmpAddress, callAddress, returnAddress, pcAfterAddition, readData1Decode, readData2Decode, writeBackData
     : STD_LOGIC_VECTOR(15 DOWNTO 0);
-    SIGNAL bubblingSignal, writeBackEnable, FDbufferEnable, DEbufferEnable, EM1bufferEnable,MMbufferEnable,MWBbufferEnable, FDrst, DErst, EM1rst,MMrst,MWBrst, flagEnable : STD_LOGIC := '0';
+    SIGNAL bubblingSignal, writeBackEnable, FDbufferEnable, DEbufferEnable, EM1bufferEnable,MMbufferEnable,MWBbufferEnable, FDrst, DErst, EM1rst,MMrst,MWBrst, flagEnable, outputPortValidTemp : STD_LOGIC := '0';
     SIGNAL pcSource : STD_LOGIC_VECTOR(1 DOWNTO 0) := "00";
     SIGNAL instructions : STD_LOGIC_VECTOR(31 DOWNTO 0);
     SIGNAL aluOut : STD_LOGIC_VECTOR(15 DOWNTO 0);
@@ -35,6 +35,7 @@ ARCHITECTURE processorArch OF processor IS
     SIGNAL CallSignalControl : STD_LOGIC := '0';
     SIGNAL SPSignalControl : STD_LOGIC := '0';
     SIGNAL SPAddress : STD_LOGIC_VECTOR(15 DOWNTO 0) := (OTHERS => '0');
+    SIGNAL outputPortDataTemp : STD_LOGIC_VECTOR(15 DOWNTO 0) := (OTHERS => '0');
     
 BEGIN
     fetchStage : ENTITY work.fetchStage PORT MAP(clk, rst, bubblingSignal, pcSource, jmpAddress, callAddress
@@ -128,6 +129,10 @@ BEGIN
 
 
     writeBackStage: ENTITY work.writebackStage PORT MAP(outMWBbuffer(35),outMWBbuffer(34 downto 19),outMWBbuffer(18 downto 3),outWriteBack);
+    --NOTE outputPortEnable is just a **PLACEHOLDER**, we need to put the outputPortEnable signal instead
+    OutPort: ENTITY work.outputPort PORT MAP(outputPortEnable, outWriteBack, outputPortValidTemp, outputPortDataTemp);
+    outputPort <= outputPortDataTemp; --output data
+    outputPortValid <= outputPortValidTemp; --output valid signal
 
     -- pcRegister : entity work.pcReg PORT MAP(pcIn, bubblingSignal, clk, rst, pcOut);
     -- pcAdder : entity work.pcAdder PORT MAP(pcOut, currentInstructions(0), pcIn);
