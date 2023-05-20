@@ -108,7 +108,10 @@ BEGIN
     MMbufferEnable <= '1';
     MMrst <= rst; -- or el 7agat el tanya
     MMBuffer : entity work.buff GENERIC MAP(60) PORT MAP(outEM1buffer, clk, MMrst, MMbufferEnable, outMMbuffer); 
-     
+
+
+    --NOTE: outBuffer(18 downto 16) is just a **PLACEHOLDER**, we need to put the stack operation instead
+    stackRegister: entity work.stackregister PORT MAP(clk, rst, outBuffer(18 downto 16), SPAddress);
     memoryStage : entity work.memoryStage PORT MAP(clk,rst,outMMbuffer(58),outMMbuffer(57),CallSignalControl,SPSignalControl,outMMbuffer(53 downto 38),outMMbuffer(15 downto 0),outMMbuffer(31 downto 16),SPAddress,OutMemory);
     
     inMWBbuffer <= outMMbuffer(59) & outMMbuffer(56) & outMemory & outMMbuffer(15 downto 0) & outMMbuffer(37 downto 35);
