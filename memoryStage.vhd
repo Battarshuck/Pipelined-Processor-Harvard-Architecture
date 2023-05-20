@@ -21,7 +21,7 @@ ARCHITECTURE memoryStageArch OF memoryStage IS
 BEGIN
     
     dataMemory : entity work.memory PORT MAP(clk, rst, MemWriteControl, MemReadControl, InterruptSignal, writeData, Address, flagIn, memoryOut, flagOut);
-    ValidPCBuffer : ENTITY work.buff GENERIC MAP(16) PORT MAP(validPCbuffInput, clk, rst, validInstructionSignal, validPCbuffOutput);
+    ValidPCBuffer : ENTITY work.buff GENERIC MAP(16) PORT MAP(validPCbuffInput, clk, rst, validInstructionSignal, validPCbuffOutput, '0');
 
 
     --if call signal is 1, that means we want to push the PC to the stack
