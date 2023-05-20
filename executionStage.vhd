@@ -21,13 +21,14 @@ ENTITY executionStage IS
         flagFromWB : IN STD_LOGIC_VECTOR(2 DOWNTO 0);
         setOrClearFlag : IN STD_LOGIC_VECTOR(1 DOWNTO 0);
         RSCR2Address : OUT STD_LOGIC_VECTOR(15 DOWNTO 0);
-        RSCR1Output : OUT STD_LOGIC_VECTOR(15 DOWNTO 0)        
+        RSCR1Output : OUT STD_LOGIC_VECTOR(15 DOWNTO 0);
+        RET_EM_buffer, RET_M1M2_buffer : IN STD_LOGIC        
     );
 END ENTITY executionStage;
 
 
 ARCHITECTURE executionStageArch OF executionStage IS
-    signal branchTrueFlag, flagEnable, tempCarry, tempCarryOutFlag, tempZeroOutFlag, tempNegativeOutFlag : STD_LOGIC;
+    signal branchTrueFlag, flagEnable, tempCarry, tempCarryOutFlag, tempZeroOutFlag, tempNegativeOutFlag, isRET : STD_LOGIC;
     signal firstOperand,secondOperand,Op2Temp,aluOutTemp, RSCR2AddressTemp: STD_LOGIC_VECTOR(15 DOWNTO 0);
     signal flagIn, flagOutput, tempFlagIn : STD_LOGIC_VECTOR(2 DOWNTO 0);
 BEGIN
@@ -53,8 +54,13 @@ BEGIN
 
     --flagEnable is '1' if and only if either the RTI signal is 1 or an instruction uses the ALU unit
     --alu operation here are ADD, INC, SUB, DEC, OR, AND, and NOT respectively
-    flagEnable <= '1' when RTISignal = '1' or aluOp ="001" or aluOp="111" or aluOp="010" or aluOp="011" or aluOp="100" or aluOp="101" or aluOp="110"  else
+    flagEnable <= '1' when isRET ='0' and (RTISignal = '1' or aluOp ="001" or aluOp="111" or aluOp="010" or aluOp="011" or aluOp="100" or aluOp="101" or aluOp="110")  else
                   '0';
+
+    --isRET check if there is RET instruction in memory1 and memory2 stages
+    --if so, then the flag cannot be changed by next ALU instruction
+    isRET <= '1' WHEN RET_EM_buffer = '1' or RET_M1M2_buffer = '1' else
+              '0';
 
     --=====================ASSIGNING FLAG OUTPUT=====================
     carryOutFlag <= flagOutput(0);  --first bit is the carry flag
