@@ -27,7 +27,7 @@ END ENTITY executionStage;
 ARCHITECTURE executionStageArch OF executionStage IS
     signal branchTrueFlag, flagEnable, tempCarry, tempCarryOutFlag, tempZeroOutFlag, tempNegativeOutFlag : STD_LOGIC;
     signal firstOperand,secondOperand,Op2Temp,aluOutTemp : STD_LOGIC_VECTOR(15 DOWNTO 0);
-    signal flagIn, flagOutput : STD_LOGIC_VECTOR(2 DOWNTO 0);
+    signal flagIn, flagOutput, tempFlagIn : STD_LOGIC_VECTOR(2 DOWNTO 0);
 BEGIN
 
     ALU : entity work.alu port map(firstOperand, secondOperand, aluOp, aluOutTemp, tempCarryOutFlag, tempZeroOutFlag, tempNegativeOutFlag);
@@ -36,7 +36,8 @@ BEGIN
     --=====================FLAG REGISTER=====================
     --if the RTI signal is 1, then the flag is set to the flag from the write back stage because it pops the flag from the stack
     --if the RTI signal is 0, then the flag is set to the flag from the ALU unit
-    flagIn <= tempCarryOutFlag & tempZeroOutFlag & tempNegativeOutFlag when RTISignal = '0' else
+    tempFlagIn <= tempCarryOutFlag & tempZeroOutFlag & tempNegativeOutFlag;
+    flagIn <= tempFlagIn when RTISignal = '0' else
              flagFromWB;
     
     --tempCarry is holds the carry flag value input, is setOrClearFlag is 00, then the carry flag is set from the ALU unit
@@ -50,7 +51,7 @@ BEGIN
 
     --flagEnable is '1' if and only if either the RTI signal is 1 or an instruction uses the ALU unit
     --alu operation here are ADD, INC, SUB, DEC, OR, AND, and NOT respectively
-    flagEnable <= '1' when RTISignal = '0' or aluOp ="001" or aluOp="111" or aluOp="010" or aluOp="011" or aluOp="100" or aluOp="101" or aluOp="110"  else
+    flagEnable <= '1' when RTISignal = '1' or aluOp ="001" or aluOp="111" or aluOp="010" or aluOp="011" or aluOp="100" or aluOp="101" or aluOp="110"  else
                   '0';
 
     --=====================ASSIGNING FLAG OUTPUT=====================
@@ -83,9 +84,9 @@ BEGIN
     --Outputing the incremented PC
     branchTrueFlagOutput <= branchTrueFlag; --this is the output signal going to the fetch stage, where is the PC changed
 
-    PCoutput <= PCincremented when branchTrueFlag = '0' else
-                immediateOP;
-                
+    PCoutput <= PCincremented when branchTrueFlag = '0' else --decding which PC should be outputed to the next buffer
+                firstOperand;
+
 
     --=====================BRANCHING=====================
     branchTrueFlag <= '0' WHEN jumpTypeSignal = "00" else -- this is the ouput from the branching unit
