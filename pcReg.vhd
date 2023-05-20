@@ -6,7 +6,7 @@ USE IEEE.numeric_std.ALL;
 --Pass value of pc and if there is a bubble then current val
 ENTITY pcReg IS
     PORT (
-        pcIn : IN STD_LOGIC_VECTOR(15 DOWNTO 0);
+        pcIn, M0 : IN STD_LOGIC_VECTOR(15 DOWNTO 0);
         bubblingSignal : IN STD_LOGIC;
         clk, rst : IN STD_LOGIC;
         pcOut : OUT STD_LOGIC_VECTOR(15 DOWNTO 0));
@@ -19,7 +19,7 @@ BEGIN
         VARIABLE currentVal : STD_LOGIC_VECTOR(15 DOWNTO 0);
     BEGIN
         IF (rst = '1') THEN
-            currentVal := (OTHERS => '0');
+            currentVal := M0;
         ELSIF rising_edge(clk) AND bubblingSignal = '0' THEN
             currentVal := pcIn;
         END IF;
