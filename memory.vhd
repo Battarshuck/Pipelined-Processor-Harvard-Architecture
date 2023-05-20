@@ -3,7 +3,7 @@ USE IEEE.STD_LOGIC_1164.ALL;
 USE IEEE.numeric_std.all;
 ENTITY memory IS
 PORT (
-    clk, reset, MemWrite, MemRead, InterruptSignal, RTISignal: IN std_logic;
+    clk, reset, MemWrite, MemRead, InterruptSignal: IN std_logic;
     WriteData: in std_logic_vector(15 downto 0);--data in 
     Address: in std_logic_vector(15 downto 0); --use the first 10 bits only
     FlagRegister: in std_logic_vector(2 downto 0); --use the first 3 bits only
@@ -31,9 +31,8 @@ BEGIN
     END IF;
 
     IF  MemRead = '1' then --falling_edge(clk) and
-        if RTISignal = '1' then
-            ReadFlags <= ram(to_integer(unsigned((Address(9 downto 0))))-1);
-        end if;
+        
+        ReadFlags <= ram(to_integer(unsigned((Address(9 downto 0)))-1));
         ReadData <= ram(to_integer(unsigned((Address(9 downto 0)))));
     END IF;
 
