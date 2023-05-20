@@ -6,8 +6,7 @@ ENTITY buff IS
     PORT (
         dataIn : IN STD_LOGIC_VECTOR(n-1 DOWNTO 0);
         clk, rst, enable : IN STD_LOGIC;
-        dataOut : OUT STD_LOGIC_VECTOR(n-1 DOWNTO 0);
-        interruptSignal : IN STD_LOGIC
+        dataOut : OUT STD_LOGIC_VECTOR(n-1 DOWNTO 0)
         );
 END ENTITY buff;
 
@@ -16,7 +15,7 @@ BEGIN
     PROCESS (clk, rst)
         VARIABLE innerData : STD_LOGIC_VECTOR(n-1 DOWNTO 0);
     BEGIN
-        IF rst = '1' and interruptSignal = '0' THEN
+        IF rst = '1' and dataIn(n-1) = '0' THEN -- DATA IN OF (n-1) is INTERRUPT
             innerData := (OTHERS => '0');
         --To ensure writng in rising edge
         ELSIF rising_edge(clk) AND enable = '1' THEN

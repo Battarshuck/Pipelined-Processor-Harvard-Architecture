@@ -33,7 +33,7 @@ ARCHITECTURE executionStageArch OF executionStage IS
 BEGIN
 
     ALU : entity work.alu port map(firstOperand, secondOperand, aluOp, aluOutTemp, tempCarryOutFlag, tempZeroOutFlag, tempNegativeOutFlag);
-    FlagRegister : ENTITY work.buff GENERIC MAP(3) PORT MAP(flagIn, clk, rst, flagEnable, flagOutput, '0');
+    FlagRegister : ENTITY work.buff GENERIC MAP(3) PORT MAP(flagIn, clk, rst, flagEnable, flagOutput);
 
     --=====================FLAG REGISTER=====================
     --if the RTI signal is 1, then the flag is set to the flag from the write back stage because it pops the flag from the stack

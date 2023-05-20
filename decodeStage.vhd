@@ -64,6 +64,14 @@ BEGIN
     memRead<=dmemRead;
     memToReg<=dmemToReg;
     inPortEnable<=dinPortEnable;
+    outPortEnable<=doutPortEnable;
+    SPSignal<=dSPSignal;
+    jumpType<=djumpType;
+    stackOP<=dstackOP;
     pcSrc<=dpcSrc;
+    carrySig<=dcarrySig;
+    callSignal<=dcallSignal;
+    RETsignal<=dRETsignal;
+    RTIsignal<=dRTIsignal;
     operation<=doperation;
 END decodeStageArch;

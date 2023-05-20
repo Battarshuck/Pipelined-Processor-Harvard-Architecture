@@ -8,7 +8,6 @@ ENTITY fetchStage IS
         interruptSigFD, interruptSigDE, interruptSigInput, RTISigM1M2 : IN STD_LOGIC;
         pcSourceDE, pcSrcM1M2 : IN STD_LOGIC_VECTOR(1 DOWNTO 0);
         Rs1DE, RMemoryOutput : IN STD_LOGIC_VECTOR(15 DOWNTO 0);
-        jmpAddress, callAddress, returnAddress : IN STD_LOGIC_VECTOR(15 DOWNTO 0);
         pcAfterAddition : OUT STD_LOGIC_VECTOR(15 DOWNTO 0);
         instructions : OUT STD_LOGIC_VECTOR(31 DOWNTO 0)
     ); --main instruction + immediate value 
