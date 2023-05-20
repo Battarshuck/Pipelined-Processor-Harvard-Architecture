@@ -20,7 +20,8 @@ ENTITY executionStage IS
         RTISignal : IN STD_LOGIC;
         flagFromWB : IN STD_LOGIC_VECTOR(2 DOWNTO 0);
         setOrClearFlag : IN STD_LOGIC_VECTOR(1 DOWNTO 0);
-        RSCR2Address : OUT STD_LOGIC_VECTOR(15 DOWNTO 0)        
+        RSCR2Address : OUT STD_LOGIC_VECTOR(15 DOWNTO 0);
+        RSCR1Output : OUT STD_LOGIC_VECTOR(15 DOWNTO 0)        
     );
 END ENTITY executionStage;
 
@@ -102,5 +103,8 @@ BEGIN
                       '1' WHEN jumpTypeSignal = "01" else
                       flagOutput(1) when jumpTypeSignal = "10" else
                       flagOutput(0);
+
+    --this is used back at the fetch stage for the PC
+    RSCR1Output <= firstOperand;
 
 END executionStageArch;
