@@ -54,9 +54,9 @@ BEGIN
               '0';
 
     --=====================ASSIGNING FLAG OUTPUT=====================
-    carryOutFlag <= flagOutput(2);  --first bit is the carry flag
+    carryOutFlag <= flagOutput(2);  --third bit is the carry flag
     zeroFlag <= flagOutput(1);      --second bit is the zero flag
-    negativeFlag <= flagOutput(0);  --third bit is the negative flag
+    negativeFlag <= flagOutput(0);  --first bit is the negative flag
 
 
     --=====================ALU INPUT=====================
@@ -98,8 +98,8 @@ BEGIN
 
     branchTrueFlag <= '0' WHEN jumpTypeSignal = "00" else -- this is the ouput from the branching unit
                       '1' WHEN jumpTypeSignal = "01" else
-                      flagOutput(1) when jumpTypeSignal = "10" else
-                      flagOutput(0);
+                      flagOutput(1) when jumpTypeSignal = "10" else --jmpzero
+                      flagOutput(2); --jmpcarry
 
     --this is used back at the fetch stage for the PC
     RSCR1Output <= firstOperand;
