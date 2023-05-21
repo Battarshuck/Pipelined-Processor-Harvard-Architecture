@@ -13,7 +13,7 @@ END ENTITY processor2;
 
 ARCHITECTURE processorArch OF processor2 IS
     --Fetch stage signals:
-    SIGNAL bubblingSignal: STD_LOGIC := '0';
+    SIGNAL bubblingSignal : STD_LOGIC := '0';
     SIGNAL RMemoryOutput : STD_LOGIC_VECTOR(15 DOWNTO 0) := (OTHERS => '0');
     SIGNAL pcAfterAdditionFetch : STD_LOGIC_VECTOR(15 DOWNTO 0);
     SIGNAL instructionsFetch : STD_LOGIC_VECTOR(31 DOWNTO 0);
@@ -40,10 +40,7 @@ ARCHITECTURE processorArch OF processor2 IS
     SIGNAL DErst : STD_LOGIC;
     SIGNAL outDEbuffer : STD_LOGIC_VECTOR(96 DOWNTO 0);
     --excution stage
-    SIGNAL EM_OP, MM_OP, MWB_OP : STD_LOGIC_VECTOR(15 DOWNTO 0) := (OTHERS => '0');
     SIGNAL S1_FU, S2_FU, S3_FU : STD_LOGIC_VECTOR(1 DOWNTO 0) := (OTHERS => '0');
-    SIGNAL flagFromWB : STD_LOGIC_VECTOR(2 DOWNTO 0) := (OTHERS => '0');
-    SIGNAL RET_EM_buffer, RET_M1M2_buffer : STD_LOGIC := '0';
     SIGNAL ealuOut : STD_LOGIC_VECTOR(15 DOWNTO 0) := (OTHERS => '0');
     SIGNAL ecarryOutFlag, ezeroFlag, enegativeFlag : STD_LOGIC := '0';
     SIGNAL ePCoutput : STD_LOGIC_VECTOR(15 DOWNTO 0) := (OTHERS => '0');
@@ -69,12 +66,12 @@ ARCHITECTURE processorArch OF processor2 IS
     SIGNAL M2WBrst : STD_LOGIC;
     SIGNAL outM2WBbuffer : STD_LOGIC_VECTOR(40 DOWNTO 0);
     --WB stage:
-    SIGNAL writeBackData : STD_LOGIC_VECTOR(15 DOWNTO 0):= (OTHERS => '0');
+    SIGNAL writeBackData : STD_LOGIC_VECTOR(15 DOWNTO 0) := (OTHERS => '0');
     SIGNAL writeBackFlag : STD_LOGIC_VECTOR(2 DOWNTO 0);
 BEGIN
     --Fetch stage:
     fetchStage : ENTITY work.fetchStage PORT MAP(clk, rst, bubblingSignal, ebranchTrueFlagOutput, outFDbuffer(48), outDEbuffer(96)
-        , interrupt, outM1M2buffer(76), outDEbuffer(85 DOWNTO 84), outM1M2buffer(12 downto 11)
+        , interrupt, outM1M2buffer(76), outDEbuffer(85 DOWNTO 84), outM1M2buffer(12 DOWNTO 11)
         , eRSCR1Output, RMemoryOutput, pcAfterAdditionFetch, instructionsFetch);
     ----------------------------------------------------------------------------------------------------------------------------
     --FD buffer:
@@ -95,7 +92,7 @@ BEGIN
     --instructions : IN STD_LOGIC_VECTOR(31 DOWNTO 0); -> outFDbuffer(31 downto 0)
     --isImmediate, isInterrupt : OUT STD_LOGIC;-> outFDbuffer(0) and outFDbuffer(1)
 
-    decodeStage : ENTITY work.decodeStage PORT MAP(clk, rst, outM2WBbuffer(39), outM2WBbuffer(2 downto 0), writeBackData, outFDbuffer(31 DOWNTO 0)
+    decodeStage : ENTITY work.decodeStage PORT MAP(clk, rst, outM2WBbuffer(39), outM2WBbuffer(2 DOWNTO 0), writeBackData, outFDbuffer(31 DOWNTO 0)
         , disImmediate, disInterrupt, dWriteEnable, dMemWrite, dMemRead, dMemToReg, dOutPortEnable, dInPortEnable, dSPSignal
         , dJumpType, dPcSrc, dStackOP, dCarrySig, dCallSignal, dRETsignal, dRTIsignal, dOperation, dReadData1, dReadData2);
 
@@ -145,11 +142,14 @@ BEGIN
     --=====================================================================-
     -- Execution stage:
     -- RTI signal is taken from M2WB buffer outM2WBbuffer(40)
+
+    --selectors remaining
     executionStage : ENTITY work.executionStage PORT MAP(clk, rst, outDEbuffer(72 DOWNTO 57), outDEbuffer(56 DOWNTO 41),
-        inputPort, EM_OP, MM_OP, MWB_OP, outDEbuffer(40 DOWNTO 25), S1_FU, S2_FU, S3_FU, outDEbuffer(95),
-        outDEbuffer(89), outDEbuffer(75 DOWNTO 73), outDEbuffer(87 DOWNTO 86), outDEbuffer(15 DOWNTO 0),
-        outM2WBbuffer(40), writeBackFlag, outDEbuffer(80 DOWNTO 79), RET_EM_buffer, RET_M1M2_buffer, ealuOut,
-        ecarryOutFlag, ezeroFlag, enegativeFlag, ePCoutput, ebranchTrueFlagOutput, eRSCR2Address, eRSCR1Output
+        inputPort, outEMbuffer(75 DOWNTO 60), outM1M2buffer(75 DOWNTO 60), writeBackData, outDEbuffer(40 DOWNTO 25),
+        S1_FU, S2_FU, S3_FU, outDEbuffer(95), outDEbuffer(89), outDEbuffer(75 DOWNTO 73), outDEbuffer(87 DOWNTO 86),
+        outDEbuffer(15 DOWNTO 0), outM2WBbuffer(40), writeBackFlag, outDEbuffer(80 DOWNTO 79), outEMbuffer(4),
+        outM1M2buffer(4), ealuOut, ecarryOutFlag, ezeroFlag, enegativeFlag, ePCoutput, ebranchTrueFlagOutput,
+        eRSCR2Address, eRSCR1Output
         );
     --eRSCR2Address is used for store operation
     --EM buffer:
