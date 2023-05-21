@@ -15,7 +15,7 @@ BEGIN
     PROCESS (clk, rst)
         VARIABLE innerData : STD_LOGIC_VECTOR(n-1 DOWNTO 0);
     BEGIN
-        IF rst = '1' and dataIn(n-1) = '0' THEN -- DATA IN OF (n-1) is INTERRUPT
+        IF rst = '1'  THEN
             innerData := (OTHERS => '0');
         --To ensure writng in rising edge
         ELSIF rising_edge(clk) AND enable = '1' THEN
