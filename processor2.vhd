@@ -47,22 +47,29 @@ ARCHITECTURE processorArch OF processor2 IS
     SIGNAL S1_FU, S2_FU, S3_FU : STD_LOGIC_VECTOR(1 DOWNTO 0) := (OTHERS => '0');
     SIGNAL flagFromWB : STD_LOGIC_VECTOR(2 DOWNTO 0) := (OTHERS => '0');
     SIGNAL RET_EM_buffer, RET_M1M2_buffer : STD_LOGIC := '0';
-    SIGNAL aluOut : STD_LOGIC_VECTOR(15 DOWNTO 0) := (OTHERS => '0');
-    SIGNAL carryOutFlag, zeroFlag, negativeFlag : STD_LOGIC := '0';
-    SIGNAL PCoutput : STD_LOGIC_VECTOR(15 DOWNTO 0) := (OTHERS => '0');
-    SIGNAL branchTrueFlagOutput : STD_LOGIC := '0';
-    SIGNAL RSCR2Address, RSCR1Output : STD_LOGIC_VECTOR(15 DOWNTO 0) := (OTHERS => '0');
+    SIGNAL ealuOut : STD_LOGIC_VECTOR(15 DOWNTO 0) := (OTHERS => '0');
+    SIGNAL ecarryOutFlag, ezeroFlag, enegativeFlag : STD_LOGIC := '0';
+    SIGNAL ePCoutput : STD_LOGIC_VECTOR(15 DOWNTO 0) := (OTHERS => '0');
+    SIGNAL ebranchTrueFlagOutput : STD_LOGIC := '0';
+    SIGNAL eRSCR2Address, eRSCR1Output : STD_LOGIC_VECTOR(15 DOWNTO 0) := (OTHERS => '0');
+    --EM buffer signals:
+    SIGNAL inEMbuffer : STD_LOGIC_VECTOR(76 DOWNTO 0);
+    SIGNAL EMbufferEnable : STD_LOGIC;
+    SIGNAL EMrst : STD_LOGIC;
+    SIGNAL outEMbuffer : STD_LOGIC_VECTOR(76 DOWNTO 0);
+
+
 
 BEGIN
     --Fetch stage:
-    fetchStage : ENTITY work.fetchStage PORT MAP(clk, rst, bubblingSignal, branchTrueFlagOutput, outFDbuffer(48), outDEbuffer(96)
-        , interrupt, RTISigM1M2, outDEbuffer(85 downto 84), pcSrcM1M2
-        , RSCR1Output, RMemoryOutput, pcAfterAdditionFetch, instructionsFetch);
+    fetchStage : ENTITY work.fetchStage PORT MAP(clk, rst, bubblingSignal, ebranchTrueFlagOutput, outFDbuffer(48), outDEbuffer(96)
+        , interrupt, RTISigM1M2, outDEbuffer(85 DOWNTO 84), pcSrcM1M2
+        , eRSCR1Output, RMemoryOutput, pcAfterAdditionFetch, instructionsFetch);
     ----------------------------------------------------------------------------------------------------------------------------
     --FD buffer:
     --bubbling signal is an output of the hazard detection unit
     inFDbuffer <= interrupt & pcAfterAdditionFetch & instructionsFetch;
-    rstFDbuffer <= ((branchTrueFlagOutput OR RETSignalMM OR RTISignalMM OR callSignalDE) AND NOT outFDbuffer(48)) OR rst OR outDEbuffer(96);
+    rstFDbuffer <= ((ebranchTrueFlagOutput OR RETSignalMM OR RTISignalMM OR callSignalDE) AND NOT outFDbuffer(48)) OR rst;
     enableFDbuffer <= NOT bubblingSignal;
     FDbuffer : ENTITY work.buff GENERIC MAP(49) PORT MAP(inFDbuffer, clk, rstFDbuffer, enableFDbuffer, outFDbuffer);
     --outFDbuffer(48) = interrupt Sig FD;
@@ -126,12 +133,46 @@ BEGIN
     --outDEbuffer[75:73] is operation
     --=====================================================================-
 
-    excutionStage : ENTITY work.executionStage PORT MAP(clk, rst, outDEbuffer(72 DOWNTO 57), outDEbuffer(56 DOWNTO 41),
+    executionStage : ENTITY work.executionStage PORT MAP(clk, rst, outDEbuffer(72 DOWNTO 57), outDEbuffer(56 DOWNTO 41),
         inputPort, EM_OP, MM_OP, MWB_OP, outDEbuffer(40 DOWNTO 25), S1_FU, S2_FU, S3_FU, outDEbuffer(95),
         outDEbuffer(89), outDEbuffer(75 DOWNTO 73), outDEbuffer(87 DOWNTO 86), outDEbuffer(15 DOWNTO 0),
-        outDEbuffer(76), flagFromWB, outDEbuffer(80 DOWNTO 79), RET_EM_buffer, RET_M1M2_buffer, aluOut,
-        carryOutFlag, zeroFlag, negativeFlag, PCoutput, branchTrueFlagOutput, RSCR2Address, RSCR1Output
-
+        outDEbuffer(76), flagFromWB, outDEbuffer(80 DOWNTO 79), RET_EM_buffer, RET_M1M2_buffer, ealuOut,
+        ecarryOutFlag, ezeroFlag, enegativeFlag, ePCoutput, ebranchTrueFlagOutput, eRSCR2Address, eRSCR1Output
         );
+    --eRSCR2Address is used for store operation
+    --EM buffer:
+    inEMBuffer <= outDEbuffer(96) & ealuOut & ecarryOutFlag & ezeroFlag & enegativeFlag & ePCoutput & eRSCR2Address
+        & outDEbuffer(24 DOWNTO 22) & outDEbuffer(94 DOWNTO 73);
 
+    EMbufferEnable <= NOT bubblingSignal;
+    EMrst <= (RETSignalMM OR RTISignalMM or bubblingSignal);
+
+    EMbuffer : ENTITY work.buff GENERIC MAP(77) PORT MAP(inEMBuffer, clk, EMrst, EMbufferEnable, outEMbuffer);
+
+    --outEMbuffer(76) is interrupt signal
+    --outEMbuffer(75 downto 60) is the ALU output
+    --outEMbuffer(59) is the carry flag
+    --outEMbuffer(58) is the zero flag
+    --outEMbuffer(57) is the negative flag
+    --outEMbuffer(56 downto 41) is the PC after addition or PC jump/call output
+    --outEMbuffer(40 downto 25) is the RSCR2 address (as address of memory to be written to)
+    --outEMbuffer(24 downto 22) is the destination register
+    --outEMbuffer(21 downto 0) is all the control signals
+
+    --====================Control Signal Details===========================-
+    --outEMbuffer(21) is write enable
+    --outEMbuffer(20) is memory write
+    --outEMbuffer(19) is memory read
+    --outEMbuffer(18) is memory to register
+    --outEMbuffer(17) is out port enable
+    --outEMbuffer(16) is in port enable
+    --outEMbuffer(15) is stack pointer signal
+    --outEMbuffer(14 downto 13) is jump type
+    --outEMbuffer(12 downto 11) is pc source
+    --outEMbuffer(10 downto 8) is stack operation
+    --outEMbuffer(7 downto 6) is carry signal
+    --outEMbuffer(5) is call signal
+    --outEMbuffer(4) is return signal
+    --outEMbuffer(3) is RTI signal
+    --outEMbuffer(2 downto 0) is operation
 END processorArch;
