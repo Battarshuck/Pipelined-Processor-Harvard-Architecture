@@ -13,7 +13,7 @@ END ENTITY processor2;
 
 ARCHITECTURE processorArch OF processor2 IS
     --Fetch stage signals:
-    SIGNAL bubblingSignal : STD_LOGIC := '0';
+    SIGNAL bubblingSignalDataHazard, bubblingSignalStructuralHazard, fetchBubblingSignal : STD_LOGIC := '0';
     SIGNAL RMemoryOutput : STD_LOGIC_VECTOR(15 DOWNTO 0) := (OTHERS => '0');
     SIGNAL pcAfterAdditionFetch : STD_LOGIC_VECTOR(15 DOWNTO 0);
     SIGNAL instructionsFetch : STD_LOGIC_VECTOR(31 DOWNTO 0);
@@ -70,7 +70,9 @@ ARCHITECTURE processorArch OF processor2 IS
     SIGNAL writeBackFlag : STD_LOGIC_VECTOR(2 DOWNTO 0);
 BEGIN
     --Fetch stage:
-    fetchStage : ENTITY work.fetchStage PORT MAP(clk, rst, bubblingSignal, ebranchTrueFlagOutput, outFDbuffer(48), outDEbuffer(96)
+    fetchBubblingSignal <= bubblingSignalDataHazard OR bubblingSignalStructuralHazard;
+
+    fetchStage : ENTITY work.fetchStage PORT MAP(clk, rst, fetchBubblingSignal, ebranchTrueFlagOutput, outFDbuffer(48), outDEbuffer(96)
         , interrupt, outM1M2buffer(76), outDEbuffer(85 DOWNTO 84), outM1M2buffer(12 DOWNTO 11)
         , eRSCR1Output, RMemoryOutput, pcAfterAdditionFetch, instructionsFetch);
     ----------------------------------------------------------------------------------------------------------------------------
@@ -78,7 +80,7 @@ BEGIN
     --bubbling signal is an output of the hazard detection unit
     inFDbuffer <= interrupt & pcAfterAdditionFetch & instructionsFetch;
     rstFDbuffer <= ((ebranchTrueFlagOutput OR outM1M2buffer(3) OR outM1M2buffer(4) OR outDEbuffer(78)) AND NOT outFDbuffer(48)) OR rst;
-    enableFDbuffer <= NOT bubblingSignal;
+    enableFDbuffer <= (NOT bubblingSignalDataHazard) AND (NOT bubblingSignalStructuralHazard);
     FDbuffer : ENTITY work.buff GENERIC MAP(49) PORT MAP(inFDbuffer, clk, rstFDbuffer, enableFDbuffer, outFDbuffer);
     --outFDbuffer(48) = interrupt Sig FD;
     --outFDbuffer(47 downto 32) = pcAfterAdditionFetch;
@@ -107,8 +109,8 @@ BEGIN
         & dSPSignal & djumpType & dpcSrc & dstackOP & dcarrySig & dcallSignal & dRETsignal & dRTIsignal & doperation
         & dReadData1 & dReadData2 & outFDbuffer(31 DOWNTO 16) & outFDbuffer(10 DOWNTO 2) & outFDbuffer(47 DOWNTO 32);
 
-    DEbufferEnable <= NOT bubblingSignal;
-    DErst <= ((outM1M2buffer(4) OR outM1M2buffer(3)) AND NOT outDEbuffer(89)) OR rst;
+    DEbufferEnable <= (NOT bubblingSignalDataHazard) AND (NOT bubblingSignalStructuralHazard);
+    DErst <= ((outM1M2buffer(4) OR outM1M2buffer(3) OR bubblingSignalDataHazard) AND NOT outDEbuffer(89)) OR rst;
     DEbuffer : ENTITY work.buff GENERIC MAP(97) PORT MAP(inDEbuffer, clk, DErst, DEbufferEnable, outDEbuffer);
 
     --outDEbuffer[96] is interrupt signal
@@ -156,8 +158,8 @@ BEGIN
     inEMBuffer <= outDEbuffer(96) & ealuOut & ecarryOutFlag & ezeroFlag & enegativeFlag & ePCoutput & eRSCR2Address
         & outDEbuffer(24 DOWNTO 22) & outDEbuffer(94 DOWNTO 73);
 
-    EMbufferEnable <= NOT bubblingSignal;
-    EMrst <= outM1M2buffer(4) OR outM1M2buffer(3) OR bubblingSignal OR rst;
+    EMbufferEnable <= NOT bubblingSignalStructuralHazard;
+    EMrst <= outM1M2buffer(4) OR outM1M2buffer(3) OR bubblingSignalStructuralHazard OR rst;
 
     EMbuffer : ENTITY work.buff GENERIC MAP(77) PORT MAP(inEMBuffer, clk, EMrst, EMbufferEnable, outEMbuffer);
 
@@ -231,25 +233,19 @@ BEGIN
     --writebackStage
     writebackStage : ENTITY work.writebackStage PORT MAP (outM2WBbuffer(38), outM2WBbuffer(5 DOWNTO 3),
         outM2WBbuffer(21 DOWNTO 6), outM2WBbuffer(37 DOWNTO 22), writeBackData, writeBackFlag);
-    
+
     --===============================FORWARDING UNIT==============================-
     --Forwarding Unit
-
-
-    forwardUnit : ENTITY work.FU PORT MAP(outDEbuffer(21 downto 19), outDEbuffer(18 downto 16),outEMbuffer(21),outM1M2buffer(21)
-    ,outM2WBbuffer(39),outEMbuffer(24 downto 22),outM1M2buffer(24 downto 22),outM2WBbuffer(2 downto 0),S1_FU,S2_FU,S3_FU);
+    forwardUnit : ENTITY work.FU PORT MAP(outDEbuffer(21 DOWNTO 19), outDEbuffer(18 DOWNTO 16), outEMbuffer(21), outM1M2buffer(21)
+        , outM2WBbuffer(39), outEMbuffer(24 DOWNTO 22), outM1M2buffer(24 DOWNTO 22), outM2WBbuffer(2 DOWNTO 0), S1_FU, S2_FU, S3_FU);
 
     --=============================HAZARD DETECTION UNIT==================================================-
 
     --Hazard Detection Unit
-
-
-    hdu: ENTITY work.HazardDetectionUnit PORT MAP(outFDbuffer(7 downto 5),outFDbuffer(4 downto 2),outDEbuffer(24 downto 22),
-    outEMbuffer(24 downto 22),outEMbuffer(19),outDEbuffer(92),outEMbuffer(20),outDEbuffer(93),outEMbuffer(21),outDEbuffer(94),
-    bubblingSignal);
+    hdu : ENTITY work.HazardDetectionUnit PORT MAP(outFDbuffer(7 DOWNTO 5), outFDbuffer(4 DOWNTO 2), outDEbuffer(24 DOWNTO 22),
+        outEMbuffer(24 DOWNTO 22), outEMbuffer(19), outDEbuffer(92), outEMbuffer(20), outDEbuffer(93), outEMbuffer(21), outDEbuffer(94),
+        bubblingSignalDataHazard, bubblingSignalStructuralHazard);
 
     --===============================================================================================
-
-
 
 END processorArch;
