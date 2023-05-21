@@ -80,7 +80,7 @@ BEGIN
     ----------------------------------------------------------------------------------------------------------------------------
     --Decode stage:
 
-    --inputs of decode stage 
+    --inputs of decode stage
     --instructions : IN STD_LOGIC_VECTOR(31 DOWNTO 0); -> outFDbuffer(31 downto 0)
     --isImmediate, isInterrupt : OUT STD_LOGIC;-> outFDbuffer(0) and outFDbuffer(1)
 
@@ -90,8 +90,8 @@ BEGIN
 
     --DE buffer:
     --bubbling signal is an output of the hazard detection unit
-    -- in DE BUFFER: interrupt , all CTRL signals (22 bits), 
-    --Read Data 1 (16 bits), Read Data 2 (16 bits), Immediate (16 bits), 
+    -- in DE BUFFER: interrupt , all CTRL signals (22 bits),
+    --Read Data 1 (16 bits), Read Data 2 (16 bits), Immediate (16 bits),
     --Rdest (3 bits) , Rsrc1 (3 bits), Rsrc2 (3 bits)
     --PC after addition (16 bits)
 
