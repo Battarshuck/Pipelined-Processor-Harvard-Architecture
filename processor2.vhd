@@ -57,7 +57,15 @@ ARCHITECTURE processorArch OF processor2 IS
     SIGNAL EMbufferEnable : STD_LOGIC;
     SIGNAL EMrst : STD_LOGIC;
     SIGNAL outEMbuffer : STD_LOGIC_VECTOR(76 DOWNTO 0);
-
+    --Stack register signals:
+    SIGNAL stackPointerOutput : STD_LOGIC_VECTOR(15 DOWNTO 0) := x"03FE";
+    --M1M2 buffer signals:
+    SIGNAL inM1M2buffer : STD_LOGIC_VECTOR(76 DOWNTO 0);
+    SIGNAL M1M2bufferEnable : STD_LOGIC;
+    SIGNAL M1M2rst : STD_LOGIC := '1';
+    SIGNAL outM1M2buffer : STD_LOGIC_VECTOR(76 DOWNTO 0);
+    SIGNAL validInstructionSignal : STD_LOGIC := '0';
+    SIGNAL RMemoryFlag : STD_LOGIC_VECTOR(15 DOWNTO 0) := (OTHERS => '0');
 
 
 BEGIN
@@ -132,7 +140,7 @@ BEGIN
     --outDEbuffer[76] is RTI signal
     --outDEbuffer[75:73] is operation
     --=====================================================================-
-
+    -- Execution stage:
     executionStage : ENTITY work.executionStage PORT MAP(clk, rst, outDEbuffer(72 DOWNTO 57), outDEbuffer(56 DOWNTO 41),
         inputPort, EM_OP, MM_OP, MWB_OP, outDEbuffer(40 DOWNTO 25), S1_FU, S2_FU, S3_FU, outDEbuffer(95),
         outDEbuffer(89), outDEbuffer(75 DOWNTO 73), outDEbuffer(87 DOWNTO 86), outDEbuffer(15 DOWNTO 0),
@@ -175,4 +183,34 @@ BEGIN
     --outEMbuffer(4) is return signal
     --outEMbuffer(3) is RTI signal
     --outEMbuffer(2 downto 0) is operation
+
+    --=====================================================================-
+    -- M1 Stage
+    -- Rdst will go to Forward Unit (outEMbuffer(24 downto 22)
+    inM1M2buffer <= outEMbuffer;
+    M1M2bufferEnable <= '1';
+    M1M2rst <= rst ; -- check
+    M1M2buffer : entity work.buff GENERIC MAP(77) PORT MAP(inM1M2buffer, clk, M1M2rst, M1M2bufferEnable, outM1M2buffer);
+    -- Same as EM buffer
+
+    --=====================================================================-
+    -- Stack Pointer Register
+    stackRegister : entity work.StackRegister port map (clk,rst,outM1M2bufer(10 downto 8),stackPointerOutput);
+    --=====================================================================-
+--     ENTITY memoryStage IS
+--     PORT (
+--         clk, rst, MemWriteControl, MemReadControl, CallSignalControl, SPSignalControl : IN std_logic;
+--         PCAfterAddition, dataFromALU: in std_logic_vector(15 downto 0);--data in
+--         Rsrc2Address, SPAddress: in std_logic_vector(15 downto 0);
+--         InterruptSignal, RTISignal, RETSignal, validInstructionSignal : in std_logic;  -- valid instruction signal is checked from pc added coming out from the buffer (0's)
+--         flagIn: in std_logic_vector(2 downto 0); --flag values
+--         ReadData: out std_logic_vector(15 downto 0);--data out
+--         --interrupt signal and return from interrupt signals, normal Return signal, and a bit that tells if the current instruction is valid or not (aka. flushed)
+--         ReadFlag: out std_logic_vector(15 downto 0) --flag values output from the memory
+--         ); 
+-- END ENTITY memoryStage;
+-- Memory Stage 2
+validInstructionSignal <= '0' when (outM1M2buffer(56 downto 41) = x"0000") else '1';
+memoryStage : entiy work.memoryStage port map (clk,rst,outM1M2buffer(20),outM1M2buffer(19),outM1M2buffer(5),outM1M2buffer(15),outM1M2buffer(56 downto 41),outM1M2buffer(75 downto 60),outM1M2buffer(40 downto 25),stackPointerOutput,outM1M2buffer(76),outM1M2buffer(3),outM1M2buffer(4),validInstructionSignal,outM1M2buffer(59 downto 57),RMemoryOutput,RMemoryFlag);
+
 END processorArch;
