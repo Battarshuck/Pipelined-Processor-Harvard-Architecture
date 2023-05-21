@@ -54,7 +54,7 @@ BEGIN
 
     --flagEnable is '1' if and only if either the RTI signal is 1 or an instruction uses the ALU unit
     --alu operation here are ADD, INC, SUB, DEC, OR, AND, and NOT respectively, and SETC, CLRC
-    flagEnable <= '1' when isRET ='0' and (RTISignal = '1' or aluOp ="001" or aluOp="111" or aluOp="010" or aluOp="011" or aluOp="100" or aluOp="101" or aluOp="110" or not setOrClearFlag="00")  else
+    flagEnable <= '1' when isRET ='0' and (RTISignal = '1' or aluOp ="001" or aluOp="111" or aluOp="010" or aluOp="011" or aluOp="100" or aluOp="101" or aluOp="110" or  setOrClearFlag /= "00")  else
                   '0';
 
     --isRET check if there is RET instruction in memory1 and memory2 stages

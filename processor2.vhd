@@ -145,7 +145,7 @@ BEGIN
         & outDEbuffer(24 DOWNTO 22) & outDEbuffer(94 DOWNTO 73);
 
     EMbufferEnable <= NOT bubblingSignal;
-    EMrst <= (RETSignalMM OR RTISignalMM or bubblingSignal);
+    EMrst <= RETSignalMM OR RTISignalMM or bubblingSignal or rst;
 
     EMbuffer : ENTITY work.buff GENERIC MAP(77) PORT MAP(inEMBuffer, clk, EMrst, EMbufferEnable, outEMbuffer);
 
