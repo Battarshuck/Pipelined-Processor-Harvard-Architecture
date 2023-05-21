@@ -62,7 +62,7 @@ BEGIN
     --FD buffer:
     --bubbling signal is an output of the hazard detection unit
     inFDbuffer <= interrupt & pcAfterAdditionFetch & instructionsFetch;
-    rstFDbuffer <= ((branchTrueFlagOutput OR RETSignalMM OR RTISignalMM OR callSignalDE) AND NOT outFDbuffer(48)) OR rst OR outDEbuffer(96);
+    rstFDbuffer <= ((branchTrueFlagOutput OR RETSignalMM OR RTISignalMM OR callSignalDE) AND NOT outFDbuffer(48)) OR rst;
     enableFDbuffer <= NOT bubblingSignal;
     FDbuffer : ENTITY work.buff GENERIC MAP(49) PORT MAP(inFDbuffer, clk, rstFDbuffer, enableFDbuffer, outFDbuffer);
     --outFDbuffer(48) = interrupt Sig FD;
