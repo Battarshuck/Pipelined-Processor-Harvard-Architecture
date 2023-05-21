@@ -151,7 +151,7 @@ BEGIN
         S1_FU, S2_FU, S3_FU, outDEbuffer(95), outDEbuffer(89), outDEbuffer(75 DOWNTO 73), outDEbuffer(87 DOWNTO 86),
         outDEbuffer(15 DOWNTO 0), outM2WBbuffer(40), writeBackFlag, outDEbuffer(80 DOWNTO 79), outEMbuffer(4),
         outM1M2buffer(4), ealuOut, ecarryOutFlag, ezeroFlag, enegativeFlag, ePCoutput, ebranchTrueFlagOutput,
-        eRSCR2Address, eRSCR1Output
+        eRSCR2Address, eRSCR1Output,outDEbuffer(94)
         );
     --eRSCR2Address is used for store operation
     --EM buffer:

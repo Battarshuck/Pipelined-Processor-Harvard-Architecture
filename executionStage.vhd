@@ -22,7 +22,8 @@ ENTITY executionStage IS
         PCoutput : OUT STD_LOGIC_vector(15 DOWNTO 0);
         branchTrueFlagOutput : OUT STD_LOGIC;
         RSCR2Address : OUT STD_LOGIC_VECTOR(15 DOWNTO 0);
-        RSCR1Output : OUT STD_LOGIC_VECTOR(15 DOWNTO 0)
+        RSCR1Output : OUT STD_LOGIC_VECTOR(15 DOWNTO 0);
+        writeEnable : IN STD_LOGIC
     );
 END ENTITY executionStage;
 
@@ -76,8 +77,13 @@ BEGIN
                     MWB_OP when S2_FU = "11" else 
                     (OTHERS => '0');
     --Outputing the alu output
-    aluOut <= aluOutTemp when inPortEnable = '0' else
-                    inPort;
+    aluOut <= immediateOP when inPortEnable = '0' and isImmediate ='1' and aluOp= "000" and writeEnable = '1' else
+                inPort when inPortEnable = '1' else
+                aluOutTemp;
+
+
+    --inPortEnable = '0' else
+                    --inPort;
 
     --=====================IF RSRC2 IS AN ADDRESS===========================
     RSCR2Address <= RSCR2AddressTemp;
