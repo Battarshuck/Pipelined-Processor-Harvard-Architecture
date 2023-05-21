@@ -18,7 +18,7 @@ BEGIN
         IF rst = '1'  THEN
             innerData := (OTHERS => '0');
         --To ensure writng in rising edge
-        ELSIF rising_edge(clk) AND enable = '1' THEN
+        ELSIF rising_edge(clk) AND enable = '1' AND rst = '0' THEN
             innerData := dataIn;
         END IF;
         --To ensure reading in falling edge

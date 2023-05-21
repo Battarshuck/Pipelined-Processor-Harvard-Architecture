@@ -11,18 +11,18 @@ ENTITY executionStage IS
         isImmediate : IN STD_LOGIC;
         inPortEnable : IN STD_LOGIC;
         aluOp : IN STD_LOGIC_VECTOR(2 DOWNTO 0);
-        aluOut : OUT STD_LOGIC_VECTOR(15 DOWNTO 0);
-        carryOutFlag,zeroFlag,negativeFlag : OUT STD_LOGIC;
         jumpTypeSignal : IN STD_LOGIC_VECTOR(1 DOWNTO 0);
         PCincremented : IN STD_LOGIC_vector(15 DOWNTO 0);
-        PCoutput : OUT STD_LOGIC_vector(15 DOWNTO 0);
-        branchTrueFlagOutput : OUT STD_LOGIC;
         RTISignal : IN STD_LOGIC;
         flagFromWB : IN STD_LOGIC_VECTOR(2 DOWNTO 0);
         setOrClearFlag : IN STD_LOGIC_VECTOR(1 DOWNTO 0);
+        RET_EM_buffer, RET_M1M2_buffer : IN STD_LOGIC;        
+        aluOut : OUT STD_LOGIC_VECTOR(15 DOWNTO 0);
+        carryOutFlag,zeroFlag,negativeFlag : OUT STD_LOGIC;
+        PCoutput : OUT STD_LOGIC_vector(15 DOWNTO 0);
+        branchTrueFlagOutput : OUT STD_LOGIC;
         RSCR2Address : OUT STD_LOGIC_VECTOR(15 DOWNTO 0);
-        RSCR1Output : OUT STD_LOGIC_VECTOR(15 DOWNTO 0);
-        RET_EM_buffer, RET_M1M2_buffer : IN STD_LOGIC        
+        RSCR1Output : OUT STD_LOGIC_VECTOR(15 DOWNTO 0)
     );
 END ENTITY executionStage;
 
