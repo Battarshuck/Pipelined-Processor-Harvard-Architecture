@@ -13,15 +13,13 @@ END ENTITY processor2;
 
 ARCHITECTURE processorArch OF processor2 IS
     --Fetch stage signals:
-    SIGNAL bubblingSignal, interruptSigFD, RTISigM1M2 : STD_LOGIC := '0';
-    SIGNAL pcSourceDE, pcSrcM1M2 : STD_LOGIC_VECTOR(1 DOWNTO 0) := "00";
-    SIGNAL Rs1DE, RMemoryOutput : STD_LOGIC_VECTOR(15 DOWNTO 0) := (OTHERS => '0');
+    SIGNAL bubblingSignal: STD_LOGIC := '0';
+    SIGNAL RMemoryOutput : STD_LOGIC_VECTOR(15 DOWNTO 0) := (OTHERS => '0');
     SIGNAL pcAfterAdditionFetch : STD_LOGIC_VECTOR(15 DOWNTO 0);
     SIGNAL instructionsFetch : STD_LOGIC_VECTOR(31 DOWNTO 0);
     --FD buffer signals:
     SIGNAL inFDbuffer : STD_LOGIC_VECTOR(48 DOWNTO 0);
     SIGNAL rstFDbuffer : STD_LOGIC;
-    SIGNAL RETSignalMM, RTISignalMM, callSignalDE : STD_LOGIC := '0';
     SIGNAL enableFDbuffer : STD_LOGIC;
     SIGNAL outFDbuffer : STD_LOGIC_VECTOR(48 DOWNTO 0);
     --Decode stage signals:
@@ -36,7 +34,6 @@ ARCHITECTURE processorArch OF processor2 IS
     --should be taked from write back stage
     SIGNAL writeBackEnable : STD_LOGIC := '0';
     SIGNAL writeRegisterAddress : STD_LOGIC_VECTOR(2 DOWNTO 0) := (OTHERS => '0');
-    SIGNAL writeBackData : STD_LOGIC_VECTOR(15 DOWNTO 0) := (OTHERS => '0');
     --DE buffer signals:
     SIGNAL inDEbuffer : STD_LOGIC_VECTOR(96 DOWNTO 0);
     SIGNAL DEbufferEnable : STD_LOGIC;
@@ -62,22 +59,28 @@ ARCHITECTURE processorArch OF processor2 IS
     --M1M2 buffer signals:
     SIGNAL inM1M2buffer : STD_LOGIC_VECTOR(76 DOWNTO 0);
     SIGNAL M1M2bufferEnable : STD_LOGIC;
-    SIGNAL M1M2rst : STD_LOGIC := '1';
+    SIGNAL M1M2rst : STD_LOGIC;
     SIGNAL outM1M2buffer : STD_LOGIC_VECTOR(76 DOWNTO 0);
     SIGNAL validInstructionSignal : STD_LOGIC := '0';
     SIGNAL RMemoryFlag : STD_LOGIC_VECTOR(15 DOWNTO 0) := (OTHERS => '0');
-
-
+    --M2WB buffer signals:
+    SIGNAL inM2WBbuffer : STD_LOGIC_VECTOR(40 DOWNTO 0);
+    SIGNAL M2WBbufferEnable : STD_LOGIC;
+    SIGNAL M2WBrst : STD_LOGIC;
+    SIGNAL outM2WBbuffer : STD_LOGIC_VECTOR(40 DOWNTO 0);
+    --WB stage:
+    SIGNAL writeBackData : STD_LOGIC_VECTOR(15 DOWNTO 0):= (OTHERS => '0');
+    SIGNAL writeBackFlag : STD_LOGIC_VECTOR(2 DOWNTO 0);
 BEGIN
     --Fetch stage:
     fetchStage : ENTITY work.fetchStage PORT MAP(clk, rst, bubblingSignal, ebranchTrueFlagOutput, outFDbuffer(48), outDEbuffer(96)
-        , interrupt, RTISigM1M2, outDEbuffer(85 DOWNTO 84), pcSrcM1M2
+        , interrupt, outM1M2buffer(76), outDEbuffer(85 DOWNTO 84), outM1M2buffer(12 downto 11)
         , eRSCR1Output, RMemoryOutput, pcAfterAdditionFetch, instructionsFetch);
     ----------------------------------------------------------------------------------------------------------------------------
     --FD buffer:
     --bubbling signal is an output of the hazard detection unit
     inFDbuffer <= interrupt & pcAfterAdditionFetch & instructionsFetch;
-    rstFDbuffer <= ((ebranchTrueFlagOutput OR RETSignalMM OR RTISignalMM OR callSignalDE) AND NOT outFDbuffer(48)) OR rst;
+    rstFDbuffer <= ((ebranchTrueFlagOutput OR outM1M2buffer(3) OR outM1M2buffer(4) OR outDEbuffer(78)) AND NOT outFDbuffer(48)) OR rst;
     enableFDbuffer <= NOT bubblingSignal;
     FDbuffer : ENTITY work.buff GENERIC MAP(49) PORT MAP(inFDbuffer, clk, rstFDbuffer, enableFDbuffer, outFDbuffer);
     --outFDbuffer(48) = interrupt Sig FD;
@@ -92,7 +95,7 @@ BEGIN
     --instructions : IN STD_LOGIC_VECTOR(31 DOWNTO 0); -> outFDbuffer(31 downto 0)
     --isImmediate, isInterrupt : OUT STD_LOGIC;-> outFDbuffer(0) and outFDbuffer(1)
 
-    decodeStage : ENTITY work.decodeStage PORT MAP(clk, rst, writeBackEnable, writeRegisterAddress, writeBackData, outFDbuffer(31 DOWNTO 0)
+    decodeStage : ENTITY work.decodeStage PORT MAP(clk, rst, outM2WBbuffer(39), outM2WBbuffer(2 downto 0), writeBackData, outFDbuffer(31 DOWNTO 0)
         , disImmediate, disInterrupt, dWriteEnable, dMemWrite, dMemRead, dMemToReg, dOutPortEnable, dInPortEnable, dSPSignal
         , dJumpType, dPcSrc, dStackOP, dCarrySig, dCallSignal, dRETsignal, dRTIsignal, dOperation, dReadData1, dReadData2);
 
@@ -108,7 +111,7 @@ BEGIN
         & dReadData1 & dReadData2 & outFDbuffer(31 DOWNTO 16) & outFDbuffer(10 DOWNTO 2) & outFDbuffer(47 DOWNTO 32);
 
     DEbufferEnable <= NOT bubblingSignal;
-    DErst <= ((RETSignalMM OR RTISignalMM) AND NOT outDEbuffer(89)) OR rst;
+    DErst <= ((outM1M2buffer(4) OR outM1M2buffer(3)) AND NOT outDEbuffer(89)) OR rst;
     DEbuffer : ENTITY work.buff GENERIC MAP(97) PORT MAP(inDEbuffer, clk, DErst, DEbufferEnable, outDEbuffer);
 
     --outDEbuffer[96] is interrupt signal
@@ -141,10 +144,11 @@ BEGIN
     --outDEbuffer[75:73] is operation
     --=====================================================================-
     -- Execution stage:
+    -- RTI signal is taken from M2WB buffer outM2WBbuffer(40)
     executionStage : ENTITY work.executionStage PORT MAP(clk, rst, outDEbuffer(72 DOWNTO 57), outDEbuffer(56 DOWNTO 41),
         inputPort, EM_OP, MM_OP, MWB_OP, outDEbuffer(40 DOWNTO 25), S1_FU, S2_FU, S3_FU, outDEbuffer(95),
         outDEbuffer(89), outDEbuffer(75 DOWNTO 73), outDEbuffer(87 DOWNTO 86), outDEbuffer(15 DOWNTO 0),
-        outDEbuffer(76), flagFromWB, outDEbuffer(80 DOWNTO 79), RET_EM_buffer, RET_M1M2_buffer, ealuOut,
+        outM2WBbuffer(40), writeBackFlag, outDEbuffer(80 DOWNTO 79), RET_EM_buffer, RET_M1M2_buffer, ealuOut,
         ecarryOutFlag, ezeroFlag, enegativeFlag, ePCoutput, ebranchTrueFlagOutput, eRSCR2Address, eRSCR1Output
         );
     --eRSCR2Address is used for store operation
@@ -153,7 +157,7 @@ BEGIN
         & outDEbuffer(24 DOWNTO 22) & outDEbuffer(94 DOWNTO 73);
 
     EMbufferEnable <= NOT bubblingSignal;
-    EMrst <= RETSignalMM OR RTISignalMM or bubblingSignal or rst;
+    EMrst <= outM1M2buffer(4) OR outM1M2buffer(3) OR bubblingSignal OR rst;
 
     EMbuffer : ENTITY work.buff GENERIC MAP(77) PORT MAP(inEMBuffer, clk, EMrst, EMbufferEnable, outEMbuffer);
 
@@ -189,28 +193,43 @@ BEGIN
     -- Rdst will go to Forward Unit (outEMbuffer(24 downto 22)
     inM1M2buffer <= outEMbuffer;
     M1M2bufferEnable <= '1';
-    M1M2rst <= rst ; -- check
-    M1M2buffer : entity work.buff GENERIC MAP(77) PORT MAP(inM1M2buffer, clk, M1M2rst, M1M2bufferEnable, outM1M2buffer);
+    M1M2rst <= rst; -- check
+    M1M2buffer : ENTITY work.buff GENERIC MAP(77) PORT MAP(inM1M2buffer, clk, M1M2rst, M1M2bufferEnable, outM1M2buffer);
     -- Same as EM buffer
 
     --=====================================================================-
     -- Stack Pointer Register
-    stackRegister : entity work.StackRegister port map (clk,rst,outM1M2bufer(10 downto 8),stackPointerOutput);
+    stackRegister : ENTITY work.StackRegister PORT MAP (clk, rst, outM1M2buffer(10 DOWNTO 8), stackPointerOutput);
     --=====================================================================-
---     ENTITY memoryStage IS
---     PORT (
---         clk, rst, MemWriteControl, MemReadControl, CallSignalControl, SPSignalControl : IN std_logic;
---         PCAfterAddition, dataFromALU: in std_logic_vector(15 downto 0);--data in
---         Rsrc2Address, SPAddress: in std_logic_vector(15 downto 0);
---         InterruptSignal, RTISignal, RETSignal, validInstructionSignal : in std_logic;  -- valid instruction signal is checked from pc added coming out from the buffer (0's)
---         flagIn: in std_logic_vector(2 downto 0); --flag values
---         ReadData: out std_logic_vector(15 downto 0);--data out
---         --interrupt signal and return from interrupt signals, normal Return signal, and a bit that tells if the current instruction is valid or not (aka. flushed)
---         ReadFlag: out std_logic_vector(15 downto 0) --flag values output from the memory
---         ); 
--- END ENTITY memoryStage;
--- Memory Stage 2
-validInstructionSignal <= '0' when (outM1M2buffer(56 downto 41) = x"0000") else '1';
-memoryStage : entiy work.memoryStage port map (clk,rst,outM1M2buffer(20),outM1M2buffer(19),outM1M2buffer(5),outM1M2buffer(15),outM1M2buffer(56 downto 41),outM1M2buffer(75 downto 60),outM1M2buffer(40 downto 25),stackPointerOutput,outM1M2buffer(76),outM1M2buffer(3),outM1M2buffer(4),validInstructionSignal,outM1M2buffer(59 downto 57),RMemoryOutput,RMemoryFlag);
+
+    -- Memory Stage 2
+    validInstructionSignal <= '0' WHEN (outM1M2buffer(56 DOWNTO 41) = x"0000") ELSE
+        '1';
+    memoryStage : ENTITY work.memoryStage PORT MAP (clk, rst, outM1M2buffer(20), outM1M2buffer(19),
+        outM1M2buffer(5), outM1M2buffer(15), outM1M2buffer(56 DOWNTO 41), outM1M2buffer(75 DOWNTO 60),
+        outM1M2buffer(40 DOWNTO 25), stackPointerOutput, outM1M2buffer(76), outM1M2buffer(3), outM1M2buffer(4),
+        validInstructionSignal, outM1M2buffer(59 DOWNTO 57), RMemoryOutput, RMemoryFlag);
+
+    --=====================================================================-
+    --M2WB buffer
+    inM2WBbuffer <= outM1M2buffer(3) & outM1M2buffer(21) & outM1M2buffer(18) & outM1M2buffer(75 DOWNTO 60) &
+        RMemoryOutput & RMemoryFlag(2 DOWNTO 0) & outM1M2buffer(24 DOWNTO 22);
+    M2WBbufferEnable <= '1';
+    M2WBrst <= rst; -- check
+    M2WBbuffer : ENTITY work.buff GENERIC MAP(41) PORT MAP(inM2WBbuffer, clk, M2WBrst, M2WBbufferEnable, outM2WBbuffer);
+
+    --outM2WBbuffer(40) is flag enable(RTI signal)
+    --outM2WBbuffer(39) is write back enable
+    --outM2WBbuffer(38) is memory to reg
+    --outM2WBbuffer(37 downto 22) is alu output
+    --outM2WBbuffer(21 downto 6) is memory output
+    --outM2WBbuffer(5 downto 3) is memory flag
+    --outM2WBbuffer(2 downto 0) is Rdst
+
+    --=====================================================================-
+
+    --writebackStage
+    writebackStage : ENTITY work.writebackStage PORT MAP (outM2WBbuffer(38), outM2WBbuffer(5 DOWNTO 3),
+        outM2WBbuffer(21 DOWNTO 6), outM2WBbuffer(37 DOWNTO 22), writeBackData, writeBackFlag);
 
 END processorArch;
