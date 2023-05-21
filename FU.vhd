@@ -16,7 +16,6 @@ ENTITY FU IS
          --Add R2,R6,R7
          --STR R1,R2 ---> R2 is data register and R1 is the address register (holds the address of store)
          --R1 value is the addres that needs forwarding for the store operation
-        MemoryWriteSigEM,MemoryWriteSigMM,MemoryWriteSigMWB: IN STD_LOGIC;
          --register destination at execute stage or memory stage 1 or memory stage 2
          RdEM,RdMM,RdMWB: IN STD_LOGIC_VECTOR(2 DOWNTO 0);
          --output is a signal to the mux at execute stage to select the correct input for the alu

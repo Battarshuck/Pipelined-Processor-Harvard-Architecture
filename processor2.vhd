@@ -231,5 +231,25 @@ BEGIN
     --writebackStage
     writebackStage : ENTITY work.writebackStage PORT MAP (outM2WBbuffer(38), outM2WBbuffer(5 DOWNTO 3),
         outM2WBbuffer(21 DOWNTO 6), outM2WBbuffer(37 DOWNTO 22), writeBackData, writeBackFlag);
+    
+    --===============================FORWARDING UNIT==============================-
+    --Forwarding Unit
+
+
+    forwardUnit : ENTITY work.FU PORT MAP(outDEbuffer(21 downto 19), outDEbuffer(18 downto 16),outEMbuffer(21),outM1M2buffer(21)
+    ,outM2WBbuffer(39),outEMbuffer(24 downto 22),outM1M2buffer(24 downto 22),outM2WBbuffer(2 downto 0),S1_FU,S2_FU,S3_FU);
+
+    --=============================HAZARD DETECTION UNIT==================================================-
+
+    --Hazard Detection Unit
+
+
+    hdu: ENTITY work.HazardDetectionUnit PORT MAP(outFDbuffer(7 downto 5),outFDbuffer(4 downto 2),outDEbuffer(24 downto 22),
+    outEMbuffer(24 downto 22),outEMbuffer(19),outDEbuffer(92),outEMbuffer(20),outDEbuffer(93),outEMbuffer(21),outDEbuffer(94),
+    bubblingSignal);
+
+    --===============================================================================================
+
+
 
 END processorArch;
