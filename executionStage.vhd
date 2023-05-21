@@ -28,13 +28,13 @@ END ENTITY executionStage;
 
 
 ARCHITECTURE executionStageArch OF executionStage IS
-    signal branchTrueFlag, flagEnable, tempCarry, tempCarryOutFlag, tempZeroOutFlag, tempNegativeOutFlag, isRET : STD_LOGIC;
+    signal branchTrueFlag, flagEnable,tempCarryOutFlag, tempZeroOutFlag, tempNegativeOutFlag, isRET : STD_LOGIC;
     signal firstOperand,secondOperand,Op2Temp,aluOutTemp, RSCR2AddressTemp: STD_LOGIC_VECTOR(15 DOWNTO 0);
     signal flagIn, flagOutput, tempFlagIn : STD_LOGIC_VECTOR(2 DOWNTO 0);
 BEGIN
 
     ALU : entity work.alu port map(firstOperand, secondOperand, aluOp, aluOutTemp, tempCarryOutFlag, tempZeroOutFlag, tempNegativeOutFlag);
-    FlagRegister : ENTITY work.buff GENERIC MAP(3) PORT MAP(flagIn, clk, rst, flagEnable, flagOutput);
+    flagRegister : ENTITY work.flagRegister PORT MAP(clk, rst, flagEnable, setOrClearFlag, flagIn, flagOutput);
 
     --=====================FLAG REGISTER=====================
     --if the RTI signal is 1, then the flag is set to the flag from the write back stage because it pops the flag from the stack
@@ -42,19 +42,10 @@ BEGIN
     tempFlagIn <= tempCarryOutFlag & tempZeroOutFlag & tempNegativeOutFlag;
     flagIn <= tempFlagIn when RTISignal = '0' else
              flagFromWB;
-    
-    --tempCarry is holds the carry flag value input, is setOrClearFlag is 00, then the carry flag is set from the ALU unit
-    --if setOrClearFlag is 01, then the carry flag is cleared
-    --if setOrClearFlag is 10, then the carry flag is set to 1
-    --if setOrClearFlag is 11, then the carry flag is set to 0 (exists for completeness, no latch)
-    tempCarry <= tempCarryOutFlag WHEN setOrClearFlag = "00" else
-                 '0' WHEN setOrClearFlag = "01" else
-                 '1' WHEN setOrClearFlag = "10" else
-                 '0';
 
     --flagEnable is '1' if and only if either the RTI signal is 1 or an instruction uses the ALU unit
     --alu operation here are ADD, INC, SUB, DEC, OR, AND, and NOT respectively, and SETC, CLRC
-    flagEnable <= '1' when isRET ='0' and (RTISignal = '1' or aluOp ="001" or aluOp="111" or aluOp="010" or aluOp="011" or aluOp="100" or aluOp="101" or aluOp="110" or not setOrClearFlag="00")  else
+    flagEnable <= '1' when RTISignal = '1' or (isRET ='0' and (aluOp ="001" or aluOp="111" or aluOp="010" or aluOp="011" or aluOp="100" or aluOp="101" or aluOp="110" or  setOrClearFlag /= "00"))  else
                   '0';
 
     --isRET check if there is RET instruction in memory1 and memory2 stages
@@ -63,9 +54,9 @@ BEGIN
               '0';
 
     --=====================ASSIGNING FLAG OUTPUT=====================
-    carryOutFlag <= flagOutput(0);  --first bit is the carry flag
+    carryOutFlag <= flagOutput(2);  --first bit is the carry flag
     zeroFlag <= flagOutput(1);      --second bit is the zero flag
-    negativeFlag <= flagOutput(2);  --third bit is the negative flag
+    negativeFlag <= flagOutput(0);  --third bit is the negative flag
 
 
     --=====================ALU INPUT=====================
