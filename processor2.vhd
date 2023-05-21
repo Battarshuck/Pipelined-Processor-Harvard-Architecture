@@ -13,7 +13,7 @@ END ENTITY processor2;
 
 ARCHITECTURE processorArch OF processor2 IS
 --Fetch stage signals:
-SIGNAL bubblingSignal,branchTrueSig,interruptSigFD, interruptSigDE, RTISigM1M2 : STD_LOGIC:= '0';
+SIGNAL bubblingSignal,branchTrueSig,interruptSigFD, RTISigM1M2 : STD_LOGIC:= '0';
 SIGNAL pcSourceDE, pcSrcM1M2 : STD_LOGIC_VECTOR(1 DOWNTO 0) := "00";
 SIGNAL Rs1DE, RMemoryOutput : STD_LOGIC_VECTOR(15 DOWNTO 0):= (OTHERS => '0');
 SIGNAL pcAfterAdditionFetch : STD_LOGIC_VECTOR(15 DOWNTO 0);
@@ -49,7 +49,7 @@ SIGNAL outDEbuffer : STD_LOGIC_VECTOR(95 DOWNTO 0);
 
 begin
     --Fetch stage:
-    fetchStage : ENTITY work.fetchStage PORT MAP(clk, rst, bubblingSignal, branchTrueSig, interruptSigFD, interruptSigDE
+    fetchStage : ENTITY work.fetchStage PORT MAP(clk, rst, bubblingSignal, branchTrueSig, interruptSigFD, outDEbuffer(95)
         , interrupt, RTISigM1M2, pcSourceDE, pcSrcM1M2
         , Rs1DE, RMemoryOutput, pcAfterAdditionFetch, instructionsFetch);
     ----------------------------------------------------------------------------------------------------------------------------
