@@ -16,7 +16,7 @@ BEGIN
 --we could have used a flip-flop, but we would have to use a clock, and we don't need it
 --to remove the latch, we can simply add else dataOut <= x"0000"; in the when statement
 --*could be changed later*
-dataOut <= dataIn when enable = '1';
+dataOut <= dataIn;
 
 validData <= enable;
 
