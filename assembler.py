@@ -212,7 +212,7 @@ def compile(nameInputFile: str, outputFile):
                             raise Exception(
                                 "(WRONG VALUE OR NUMBER OF PARAMETERS) Syntax error at line number " + str(actualLineNumber))
                         
-                        writeInFinaleFile("000000000000000000", lineNumber, outputFile)
+                        writeInFinaleFile("0000000000000000", lineNumber, outputFile)
                         lineNumber += 1
                         continue #this command does not need to be written in the output file, so we continue to the next line
                     #if the register name is not found in the registers dictionary
