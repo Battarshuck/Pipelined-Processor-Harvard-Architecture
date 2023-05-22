@@ -17,7 +17,7 @@ END ENTITY memoryStage;
 
 
 ARCHITECTURE memoryStageArch OF memoryStage IS   
-    SIGNAL writeData, Address, memoryOut, flagOut, validPCbuffInput, validPCbuffOutput, dataIntemp : std_logic_vector(15 downto 0);
+    SIGNAL writeData, Address, memoryOut, flagOut, validPCbuffInput, validPCbuffOutput, dataIntemp : std_logic_vector(15 downto 0):= (others=>'0');
     -- signal validInstructionSignal : std_logic;
 BEGIN
     -- validInstructionSignal <= '0' WHEN PCAfterAddition = "0000000000000000000" ELSE '1';
@@ -26,7 +26,7 @@ BEGIN
 
 
     --if call signal is 1, that means we want to push the PC to the stack
-    writeData <= dataIntemp WHEN CallSignalControl = '0' and InterruptSignal = '0' ELSE
+    writeData <= dataFromALU WHEN CallSignalControl = '0' and InterruptSignal = '0' ELSE
                 validPCbuffOutput;
 
     --if SPsignal is 1, that means we want to use the stack pointer as the address, so we assign the memory address to be the stack pointer
