@@ -152,6 +152,7 @@ def compile(nameInputFile: str, outputFile):
             instructionCode: str = ""
             # return the operands of the instruction
             currentOperands: List = splitInstruction(line)
+            instruction_name: str = currentOperands[0]
             # if the line is empty or a comment line
             if currentOperands[0] == "" or currentOperands[0][0] == "#":
                 continue
@@ -181,6 +182,13 @@ def compile(nameInputFile: str, outputFile):
             if expectedNumOfOperands != len(currentOperands) - 1:
                 raise Exception(
                     "(CHECK NUM OF OPERANDS) Syntax error at line number " + str(actualLineNumber))
+            
+
+            #=================================================================================================   
+            if instruction_name == "PUSH" or instruction_name == "POP":
+                writeInFinaleFile("000000000000000000", lineNumber, outputFile)
+                lineNumber += 1
+            #================================================================================================= 
 
             # zero operands
             # if the command is a zero operand command pad with zeros after opCode
@@ -203,6 +211,9 @@ def compile(nameInputFile: str, outputFile):
                         else:
                             raise Exception(
                                 "(WRONG VALUE OR NUMBER OF PARAMETERS) Syntax error at line number " + str(actualLineNumber))
+                        
+                        writeInFinaleFile("000000000000000000", lineNumber, outputFile)
+                        lineNumber += 1
                         continue #this command does not need to be written in the output file, so we continue to the next line
                     #if the register name is not found in the registers dictionary
                     if currentOperands[1] not in registers:
@@ -217,6 +228,7 @@ def compile(nameInputFile: str, outputFile):
                     if currentOperands[1] not in registers:
                         raise Exception(
                             "(REG NAME NOT FOUND) Syntax error at line number " + str(actualLineNumber))
+    
                     instructionCode += "000"
                     instructionCode += registers[currentOperands[1]]
                     instructionCode += "000000000000000000"
@@ -296,6 +308,10 @@ def compile(nameInputFile: str, outputFile):
                 writeInFinaleFile(immediateValue, lineNumber, outputFile)
             
             lineNumber += 1
+
+            if instruction_name == "JMP" or instruction_name == "JZ" or instruction_name == "JC" or instruction_name =="CALL" or instruction_name == "RET" or instruction_name=="RTI":
+                writeInFinaleFile("000000000000000000", lineNumber, outputFile)
+                lineNumber += 1
                 
 
             
