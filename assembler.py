@@ -186,7 +186,7 @@ def compile(nameInputFile: str, outputFile):
 
             #=================================================================================================   
             if instruction_name == "PUSH" or instruction_name == "POP":
-                writeInFinaleFile("000000000000000000", lineNumber, outputFile)
+                writeInFinaleFile("0000000000000000", lineNumber, outputFile)
                 lineNumber += 1
             #================================================================================================= 
 
@@ -310,7 +310,7 @@ def compile(nameInputFile: str, outputFile):
             lineNumber += 1
 
             if instruction_name == "JMP" or instruction_name == "JZ" or instruction_name == "JC" or instruction_name =="CALL" or instruction_name == "RET" or instruction_name=="RTI":
-                writeInFinaleFile("000000000000000000", lineNumber, outputFile)
+                writeInFinaleFile("0000000000000000", lineNumber, outputFile)
                 lineNumber += 1
                 
 
