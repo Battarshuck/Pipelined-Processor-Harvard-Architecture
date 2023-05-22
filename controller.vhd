@@ -126,9 +126,8 @@ pcSrc<="01" when opCode="10110" or opCode="10101" else
 "00";
 
 stackOP<="011" when isInterrupt='1' else
-"001" when opCode="01110" else
-"010" when opCode="10000" else
-"100" when opCode="01111" else
+"001" when opCode="01110" or opCode="10000"  else
+"100" when opCode="01111" or opCode="10001" else
 "101" when opCode="10001" else
 "111" when opCode="10010" else
 "000";

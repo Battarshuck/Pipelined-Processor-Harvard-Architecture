@@ -21,9 +21,9 @@ PROCESS (clk, rst) IS
             value := x"03FE";
         ELSIF (rising_edge(clk)) THEN    
 
-            IF (operation = "001" OR operation = "010") THEN -- PUSH & CALL both of them decrease the stack pointer by 1
+            IF (operation = "001") THEN -- PUSH & CALL both of them decrease the stack pointer by 1
                 value := std_logic_vector(to_unsigned(to_integer(signed(value))-1,16));
-            ELSIF (operation = "100" OR operation = "101") THEN -- POP & RET both of them increase the stack pointer by 1
+            ELSIF (operation = "100") THEN -- POP & RET both of them increase the stack pointer by 1
                 value := std_logic_vector(to_unsigned(to_integer(signed(value))+1,16));
             ELSIF (operation = "011") THEN -- INTERRUPT
                 value := std_logic_vector(to_unsigned(to_integer(signed(value))-2,16));

@@ -13,7 +13,7 @@ END ENTITY processor2;
 
 ARCHITECTURE processorArch OF processor2 IS
     --Fetch stage signals:
-    SIGNAL bubblingSignalDataHazard, bubblingSignalStructuralHazard, fetchBubblingSignal : STD_LOGIC := '0';
+    SIGNAL bubblingSignalDataHazard, bubblingSignalStructuralHazard, fetchBubblingSignal, RETorRTi, RETorRTiEM : STD_LOGIC := '0';
     SIGNAL RMemoryOutput : STD_LOGIC_VECTOR(15 DOWNTO 0) := (OTHERS => '0');
     SIGNAL pcAfterAdditionFetch : STD_LOGIC_VECTOR(15 DOWNTO 0);
     SIGNAL instructionsFetch : STD_LOGIC_VECTOR(31 DOWNTO 0);
@@ -72,9 +72,21 @@ BEGIN
     --Fetch stage:
     fetchBubblingSignal <= bubblingSignalDataHazard OR bubblingSignalStructuralHazard;
 
+--     ENTITY fetchStage IS
+--     PORT (
+--         interruptSigFD, interruptSigDE, interruptSigInput, RTISigM1M2 : IN STD_LOGIC;
+--         pcSourceDE, pcSrcM1M2 : IN STD_LOGIC_VECTOR(1 DOWNTO 0);
+--         Rs1DE, RMemoryOutput : IN STD_LOGIC_VECTOR(15 DOWNTO 0);
+--         pcAfterAddition : OUT STD_LOGIC_VECTOR(15 DOWNTO 0);
+--         instructions : OUT STD_LOGIC_VECTOR(31 DOWNTO 0)
+--     ); --main instruction + immediate value 
+-- END ENTITY fetchStage;
+
+    RETorRTi <= outM1M2buffer(3) or outM1M2buffer(4);
+    RETorRTiEM <= outDEbuffer(76) or outDEbuffer(77) ;
     fetchStage : ENTITY work.fetchStage PORT MAP(clk, rst, fetchBubblingSignal, ebranchTrueFlagOutput, outFDbuffer(48), outDEbuffer(96)
-        , interrupt, outM1M2buffer(3), outDEbuffer(85 DOWNTO 84), outM1M2buffer(12 DOWNTO 11)
-        , eRSCR1Output, RMemoryOutput, pcAfterAdditionFetch, instructionsFetch);
+        , interrupt, RETorRTi, outDEbuffer(85 DOWNTO 84), outM1M2buffer(12 DOWNTO 11)
+        , eRSCR1Output, RMemoryOutput, pcAfterAdditionFetch, instructionsFetch, RETorRTiEM);
     ----------------------------------------------------------------------------------------------------------------------------
     --FD buffer:
     --bubbling signal is an output of the hazard detection unit

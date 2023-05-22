@@ -9,7 +9,8 @@ ENTITY fetchStage IS
         pcSourceDE, pcSrcM1M2 : IN STD_LOGIC_VECTOR(1 DOWNTO 0);
         Rs1DE, RMemoryOutput : IN STD_LOGIC_VECTOR(15 DOWNTO 0);
         pcAfterAddition : OUT STD_LOGIC_VECTOR(15 DOWNTO 0);
-        instructions : OUT STD_LOGIC_VECTOR(31 DOWNTO 0)
+        instructions : OUT STD_LOGIC_VECTOR(31 DOWNTO 0);
+        RETorRTiEM:  IN STD_LOGIC
     ); --main instruction + immediate value 
 END ENTITY fetchStage;
 
@@ -20,7 +21,7 @@ ARCHITECTURE fetchStageArch OF fetchStage IS
     SIGNAL currentInstructionsEnteringBuffer : STD_LOGIC_VECTOR(31 DOWNTO 0);
 BEGIN
 
-    pcHandler : ENTITY work.pcHandler PORT MAP(pcSourceDE, pcSrcM1M2, interruptSigFD, interruptSigDE, RTISigM1M2, pcSrc);
+    pcHandler : ENTITY work.pcHandler PORT MAP(pcSourceDE, pcSrcM1M2, interruptSigFD, interruptSigDE, RTISigM1M2, RETorRTiEM, pcSrc);
 
     muxBranchTrue <= pcInOutFromAdder WHEN (branchTrueSig = '0') ELSE
         Rs1DE; -- make sure from r source 1 if jmp!!!!!!
