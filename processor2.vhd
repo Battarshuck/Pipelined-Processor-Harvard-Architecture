@@ -61,10 +61,10 @@ ARCHITECTURE processorArch OF processor2 IS
     SIGNAL validInstructionSignal : STD_LOGIC := '0';
     SIGNAL RMemoryFlag : STD_LOGIC_VECTOR(15 DOWNTO 0) := (OTHERS => '0');
     --M2WB buffer signals:
-    SIGNAL inM2WBbuffer : STD_LOGIC_VECTOR(40 DOWNTO 0);
+    SIGNAL inM2WBbuffer : STD_LOGIC_VECTOR(41 DOWNTO 0);
     SIGNAL M2WBbufferEnable : STD_LOGIC;
     SIGNAL M2WBrst : STD_LOGIC;
-    SIGNAL outM2WBbuffer : STD_LOGIC_VECTOR(40 DOWNTO 0);
+    SIGNAL outM2WBbuffer : STD_LOGIC_VECTOR(41 DOWNTO 0);
     --WB stage:
     SIGNAL writeBackData : STD_LOGIC_VECTOR(15 DOWNTO 0) := (OTHERS => '0');
     SIGNAL writeBackFlag : STD_LOGIC_VECTOR(2 DOWNTO 0);
@@ -214,12 +214,13 @@ BEGIN
 
     --=====================================================================-
     --M2WB buffer
-    inM2WBbuffer <= outM1M2buffer(3) & outM1M2buffer(21) & outM1M2buffer(18) & outM1M2buffer(75 DOWNTO 60) &
+    inM2WBbuffer <= outM1M2buffer(17) & outM1M2buffer(3) & outM1M2buffer(21) & outM1M2buffer(18) & outM1M2buffer(75 DOWNTO 60) &
         RMemoryOutput & RMemoryFlag(2 DOWNTO 0) & outM1M2buffer(24 DOWNTO 22);
     M2WBbufferEnable <= '1';
     M2WBrst <= rst; -- check
-    M2WBbuffer : ENTITY work.buff GENERIC MAP(41) PORT MAP(inM2WBbuffer, clk, M2WBrst, M2WBbufferEnable, outM2WBbuffer);
+    M2WBbuffer : ENTITY work.buff GENERIC MAP(42) PORT MAP(inM2WBbuffer, clk, M2WBrst, M2WBbufferEnable, outM2WBbuffer);
 
+    --outM2WBbuffer(41) is out port enable
     --outM2WBbuffer(40) is flag enable(RTI signal)
     --outM2WBbuffer(39) is write back enable
     --outM2WBbuffer(38) is memory to reg
@@ -247,5 +248,11 @@ BEGIN
         bubblingSignalDataHazard, bubblingSignalStructuralHazard);
 
     --===============================================================================================
+
+    --=============================OUTPUT PORT================================================---
+
+    outPutPorto: ENTITY work.outputPort PORT MAP(outM2WBbuffer(41), writeBackData, isOutputDataValid, outputPort);
+
+    -----------------------------------------------------------------------------------------------------------
 
 END processorArch;
