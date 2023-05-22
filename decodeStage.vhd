@@ -48,7 +48,7 @@ BEGIN
 
     
 
-    controller : ENTITY work.controller PORT MAP(instructions(15 DOWNTO 11), dwriteEnable, dmemWrite
+    controller : ENTITY work.controller PORT MAP(instructions(15 DOWNTO 11), instructions(1), dwriteEnable, dmemWrite
         , dmemRead, dmemToReg, doutPortEnable, dinPortEnable, dSPSignal, djumpType, dpcSrc, dstackOP
         , dcarrySig, dcallSignal, dRETsignal, dRTIsignal, doperation);
 

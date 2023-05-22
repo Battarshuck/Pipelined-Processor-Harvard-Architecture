@@ -6,7 +6,7 @@ entity controller is
 port(
 --input is the OP code only
 opCode: in std_logic_vector(4 downto 0);
-
+isInterrupt: in std_logic;
 
 writeEnable: out std_logic;
 memWrite: out std_logic;
@@ -92,7 +92,7 @@ memRead<='1' when opCode="10011" or  opCode="10001" or  opCode="10010"  or opCod
 memToReg<='1' when opCode="10011" or opCode="01111" else
 '0';
 
-memWrite<='1' when opCode="10100" or opCode="01110" or opCode="10000" else
+memWrite<='1' when opCode="10100" or opCode="01110" or opCode="10000" or isInterrupt='1' else
 '0';
 
 outPortEnable<='1' when opCode="01101" else
@@ -101,7 +101,7 @@ outPortEnable<='1' when opCode="01101" else
 inPortEnable<='1' when opCode="01100" else
 '0';
 
-SPSignal<='1' when opCode="01111" or opCode="01110" or opCode="10000" or opCode="10001" or opCode="10010" else
+SPSignal<='1' when opCode="01111" or opCode="01110" or opCode="10000" or opCode="10001" or opCode="10010" or isInterrupt='1' else
 '0';
 
 jumpType<="01" when opCode="10111" else
@@ -125,7 +125,8 @@ pcSrc<="01" when opCode="10110" or opCode="10101" else
 "11" when opCode="10001" or opCode="10010" else
 "00";
 
-stackOP<="001" when opCode="01110" else
+stackOP<="011" when isInterrupt='1' else
+"001" when opCode="01110" else
 "010" when opCode="10000" else
 "100" when opCode="01111" else
 "101" when opCode="10001" else
