@@ -73,7 +73,7 @@ BEGIN
     fetchBubblingSignal <= bubblingSignalDataHazard OR bubblingSignalStructuralHazard;
 
     fetchStage : ENTITY work.fetchStage PORT MAP(clk, rst, fetchBubblingSignal, ebranchTrueFlagOutput, outFDbuffer(48), outDEbuffer(96)
-        , interrupt, outM1M2buffer(76), outDEbuffer(85 DOWNTO 84), outM1M2buffer(12 DOWNTO 11)
+        , interrupt, outM1M2buffer(3), outDEbuffer(85 DOWNTO 84), outM1M2buffer(12 DOWNTO 11)
         , eRSCR1Output, RMemoryOutput, pcAfterAdditionFetch, instructionsFetch);
     ----------------------------------------------------------------------------------------------------------------------------
     --FD buffer:

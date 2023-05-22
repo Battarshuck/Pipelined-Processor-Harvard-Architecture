@@ -16,13 +16,11 @@ ARCHITECTURE pcArch OF pcReg IS
 BEGIN
 
     PROCESS (clk, rst)
-        VARIABLE currentVal : STD_LOGIC_VECTOR(15 DOWNTO 0);
     BEGIN
-        IF (rst = '1') THEN
-            currentVal := M0;
-        ELSIF rising_edge(clk) AND bubblingSignal = '0' THEN
-            currentVal := pcIn;
+        IF (rst = '1') AND falling_edge(clk) THEN
+            pcOut <= M0;
+        ELSIF falling_edge(clk) AND bubblingSignal = '0' THEN
+            pcOut <= pcIn;
         END IF;
-        pcOut <= currentVal;
     END PROCESS;
 END pcArch;
